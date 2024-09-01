@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
             ClientUserSeeder::class,
             ClientSeeder::class,
             ArticleSeeder::class,
+            DetteSeeder::class,
         ]);
     }
 }

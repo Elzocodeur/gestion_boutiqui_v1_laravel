@@ -9,7 +9,8 @@ class Article extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['reference', 'libelle', 'prix', 'quantite'];
+    // protected $fillable = ['reference', 'libelle', 'prix', 'quantite'];
+    protected $fillable = ['libelle', 'reference', 'prix', 'quantite'];
 
     protected $hidden = ['created_at', 'updated_at'];
 

@@ -19,6 +19,11 @@ class UserResource extends JsonResource
             'prenom' => $this->prenom,
             'login' => $this->login,
             'photo' => $this->photo,
+            'role_id' => $this->role_id,
+            'active' => $this->active,
+            'role' => $this->when($this->role_id, function () {
+                return new RoleResource($this->role);
+            })
         ];
     }
 }

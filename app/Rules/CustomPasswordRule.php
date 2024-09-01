@@ -16,19 +16,16 @@ class CustomPasswordRule implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $messages = [
-           0=> 'Le champ :attribute est obligatoire.',
-            1=> 'Le mot de passe doit contenir au moins :min caractères.',
-             2 => 'Le mot de passe doit contenir au moins un chiffre, une lettre, et un caractère spécial.',
-        ];
-        // dd($attribute);
-        $validator = Validator::make(request()->all(), [
-            $attribute => ['required', Password::min(8)->letters()->mixedCase()->numbers()->uncompromised()],
-        ]);
+        $validator = Validator::make(
+            [$attribute => $value],
+            [$attribute => ['required', Password::min(8)->letters()->mixedCase()->numbers()->uncompromised()]]
+        );
 
-
-        if (!$validator->passes()) {
-            $fail($validator->messages());
+        if ($validator->fails()) {
+            // Loop through each error message and pass it to the $fail closure
+            foreach ($validator->errors()->all() as $message) {
+                $fail($message);
+            }
         }
     }
 }
