@@ -38,8 +38,8 @@ class StoreArticleRequest extends FormRequest
             'libelle.string' => 'Le libellé doit contenir uniquement des lettres.',
             'prix.required' => 'Le prix est obligatoire.',
             'prix.numeric' => 'Le prix doit être un nombre valide.',
-            'qteStock.required' => 'La quantité en stock est obligatoire.',
-            'qteStock.integer' => 'La quantité en stock doit être un nombre entier.',
+            'quantite.required' => 'La quantité en stock est obligatoire.',
+            'quantite.integer' => 'La quantité en stock doit être un nombre entier.',
         ];
     }
 

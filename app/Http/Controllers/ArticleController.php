@@ -3,11 +3,9 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\StoreArticleRequest;
-use App\Http\Requests\StoreUserRequest;
 use App\Http\Requests\UpdateArticleRequest;
 use App\Http\Resources\ArticleCollection;
 use App\Http\Resources\ArticleResource;
-use App\Http\Resources\UserResource;
 use App\Models\Article;
 use App\Traits\RestResponseTrait;
 use Illuminate\Http\JsonResponse;
@@ -16,34 +14,23 @@ use Illuminate\Support\Facades\DB;
 use Spatie\QueryBuilder\QueryBuilder;
 use App\Enums\StatusResponseEnum;
 use Exception;
-use Illuminate\Support\Facades\Auth;
-use Spatie\QueryBuilder\AllowedFilter;
 use App\Http\Requests\UpdateStockRequest;
 
 
 class ArticleController extends Controller
 {
+
+    public function __construct()
+    {
+        $this->authorizeResource(Article::class, 'article');
+    }
+
     use RestResponseTrait;
-
-    /**
-     * Display a listing of the resource.
-     */
-    // public function index(Request $request)
-    // {
-    //     $include = $request->has('include') ? [$request->input('include')] : [];
-
-    //     $data = Article::with($include)->get();
-    //     $articles = QueryBuilder::for(Article::class)
-    //         ->allowedFilters(['libelle'])
-    //         ->allowedIncludes(['related_models'])
-    //         ->get();
-    //     return new ArticleCollection($articles);
-    // }
-
 
 
     public function index(Request $request)
 {
+    $this->authorize('viewAny', Article::class);
     $include = $request->has('include') ? [$request->input('include')] : [];
 
     // Start a query using QueryBuilder for advanced filtering and including related models
@@ -76,6 +63,7 @@ class ArticleController extends Controller
      */
     public function store(StoreArticleRequest $request)
     {
+        $this->authorize('create', Article::class);
         try {
             $articleData = $request->only('libelle','reference', 'prix', 'quantite');
             $article = Article::create($articleData);
@@ -91,6 +79,7 @@ class ArticleController extends Controller
      */
     public function show($id){
         $article = Article::find($id);
+        $this->authorize('view', $article);
         return new ArticleResource($article);
     }
 
@@ -99,6 +88,7 @@ class ArticleController extends Controller
      */
     public function update(UpdateArticleRequest $request, Article $article)
     {
+        $this->authorize('update', $article);
         try {
             $articleData = $request->only('libelle','reference', 'prix', 'quantite');
             $article->update($articleData);
@@ -112,6 +102,7 @@ class ArticleController extends Controller
 
     public function updateStock(Request $request)
     {
+        $this->authorize('updateStock', Article::class);
         $articleData = $request->input('articles'); // Assuming the input is an array of ['id' => 'quantity']
 
         $notFoundArticles = [];
@@ -136,7 +127,7 @@ class ArticleController extends Controller
                 'notFoundArticles' => $notFoundArticles
             ], StatusResponseEnum::SUCCESS, 200);
 
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             DB::rollBack();
 
             return $this->sendResponse(['error' => $e->getMessage()], StatusResponseEnum::ECHEC, 500);
@@ -146,6 +137,7 @@ class ArticleController extends Controller
 
     public function updateStockById(UpdateStockRequest $request, $id): JsonResponse
     {
+        $this->authorize('updateStock', Article::class);
         $article = Article::find($id);
 
         if (!$article) {
@@ -163,6 +155,7 @@ class ArticleController extends Controller
      */
     public function destroy(Article $article)
     {
+        $this->authorize('delete', $article);
         try {
             $article->delete();
 
@@ -179,6 +172,7 @@ class ArticleController extends Controller
     // afficher un article par son libelle
     public function getByLibelle(Request $request)
     {
+        $this->authorize('viewAny', Article::class);
         // Validation de la requête pour s'assurer que 'libelle' est présent et est une chaîne
         $request->validate([
             'libelle' => 'required|string',

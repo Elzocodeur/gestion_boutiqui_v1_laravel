@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\DB; //
 
+
 class AuthController extends Controller
 {
 
@@ -151,6 +152,22 @@ class AuthController extends Controller
         ], 200);
     }
 
+
+    public function logout(Request $request)
+    {
+        // Vérifier si l'utilisateur est authentifié
+        if (Auth::check()) {
+            // Récupérer l'utilisateur connecté
+            $user = Auth::user();
+
+            // Supprimer tous les tokens de l'utilisateur
+            $user->tokens()->delete(); // Supprime tous les tokens
+
+            return response()->json(['message' => 'Déconnexion réussie. Vous devez vous reconnecter pour accéder à l\'application.']);
+        }
+
+        return response()->json(['message' => 'Utilisateur non authentifié.'], 401);
+    }
 
 
 

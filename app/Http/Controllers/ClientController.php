@@ -24,27 +24,15 @@ class ClientController extends Controller
 {
     use RestResponseTrait;
 
-    //     public function index(Request $request)
-    // {
-    //     $include = $request->has('include') ? [$request->input('include')] : [];
 
-    //     // Obtenez les clients qui ont un compte utilisateur associé (user_id n'est pas null)
-    //     $clients = Client::with($include)
-    //         ->whereNotNull('user_id')
-    //         ->get();
-
-    //     // Filtrez les clients par "surname" s'il est fourni dans la requête
-    //     $clients = QueryBuilder::for(Client::class)
-    //         ->allowedFilters(['surname'])
-    //         ->allowedIncludes(['user'])
-    //         ->get();
-
-    //     // Retournez les clients sous forme de collection de ressources
-    //     return new ClientCollection($clients);
-    // }
+    public function __construct()
+    {
+        $this->authorizeResource(Client::class, 'client');
+    }
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', Client::class);
         $query = Client::query();
 
         // Filtrer les clients avec ou sans compte
@@ -84,6 +72,8 @@ class ClientController extends Controller
 
     public function store(StoreClientRequest $request)
     {
+        $this->authorize('create', Client::class);
+
         try {
             DB::beginTransaction();
 
@@ -124,11 +114,16 @@ class ClientController extends Controller
     public function show(string $id)
     {
         $client = Client::find($id);
+        $this->authorize('view', $client);
+
         return new ClientResource($client);
     }
 
     public function showClientByTelephone(Request $request)
     {
+        $this->authorize('viewAny', Client::class);
+
+
         $validated = $request->validate([
             'telephone' => 'required|string|size:9',
         ]);
@@ -146,6 +141,7 @@ class ClientController extends Controller
 
     public function addUserToClient(UpdateClientCompteRequest $request, $id)
     {
+        $this->authorize('create', Client::class);
         try {
             // Retrieve the client by ID
             $client = Client::findOrFail($id);
@@ -181,8 +177,11 @@ class ClientController extends Controller
 
     public function listDettesClient($id)
     {
+
         // Retrieve the client by ID
         $client = Client::with('dettes')->find($id);
+        $this->authorize('view', $client);
+
 
         if (!$client) {
             return $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Client non trouvé', 404);
@@ -201,6 +200,7 @@ class ClientController extends Controller
     {
         // Récupérer le client avec ses informations utilisateur
         $client = Client::with('user:id,nom,prenom,login,photo')->find($id);
+        $this->authorize('view', $client);
 
         if (!$client) {
             return $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Client non trouvé', 404);
@@ -209,4 +209,5 @@ class ClientController extends Controller
         // Retourner le client et ses informations utilisateur
         return $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Informations du client récupérées avec succès');
     }
+
 }

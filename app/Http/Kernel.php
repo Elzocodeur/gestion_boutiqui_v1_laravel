@@ -70,6 +70,7 @@ class Kernel extends HttpKernel
         // Autres middlewares...
         'auth' => \Illuminate\Auth\Middleware\Authenticate::class,
         'auth:api' => \Laravel\Passport\Http\Middleware\CreateFreshApiToken::class, // Ajoutez ceci si ce n'est pas déjà fait
+        'check.auth' => \App\Http\Middleware\CheckAuth::class,
     ];
-    
+
 }

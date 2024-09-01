@@ -13,17 +13,16 @@ class UserController extends Controller
 {
     use RestResponseTrait;
 
-    /**
-     * Display a listing of the users.
-     */
-    // public function index()
-    // {
-    //     $users = User::with('role')->get();
-    //     return $this->sendResponse(UserResource::collection($users), StatusResponseEnum::SUCCESS, 'Liste des utilisateurs récupérée avec succès');
-    // }
+
+
+    public function __construct()
+    {
+        $this->authorizeResource(User::class, 'user');
+    }
 
     public function index(Request $request)
     {
+        $this->authorize('viewAny', User::class);
         // Initialisation de la requête utilisateur
         $query = User::query();
 
@@ -61,6 +60,8 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
+        $this->authorize('create', User::class);
+
         $validatedData = $request->validated();
 
         $user = User::create([
@@ -80,7 +81,9 @@ class UserController extends Controller
      */
     public function show($id)
     {
+
         $user = User::with('role')->find($id);
+        $this->authorize('view', $user);
 
         if (!$user) {
             return $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Utilisateur non trouvé', 404);

@@ -3,6 +3,7 @@
 namespace App\Exceptions;
 
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Auth\Access\AuthorizationException;
 use Throwable;
 
 class Handler extends ExceptionHandler
@@ -27,4 +28,22 @@ class Handler extends ExceptionHandler
             //
         });
     }
+
+
+    public function render($request, Throwable $exception)
+    {
+        // Si l'exception est une exception d'autorisation
+        if ($exception instanceof AuthorizationException) {
+            return response()->json([
+                'status' => 'error',
+                'message' => "Vous n'avez pas l'autorisation d'accéder à cette ressource.",
+                'code' => 403
+            ], 403);
+        }
+
+        // Pour d'autres types d'exceptions, laissez la gestion par défaut ou personnalisez-la
+        return parent::render($request, $exception);
+    }
+
+
 }
