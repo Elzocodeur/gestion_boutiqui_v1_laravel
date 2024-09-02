@@ -12,6 +12,12 @@ class Authenticate extends Middleware
      */
     protected function redirectTo(Request $request): ?string
     {
-        return $request->expectsJson() ? null : route('login');
+        // Si la requête s'attend à une réponse JSON (comme dans Swagger), ne redirigez pas, renvoyez une réponse d'erreur JSON.
+        if ($request->expectsJson()) {
+            return null;
+        }
+
+        // Sinon, redirigez vers la page de connexion
+        return route('login');
     }
 }

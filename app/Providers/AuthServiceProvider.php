@@ -6,7 +6,7 @@ use App\Models\User;
 use App\Policies\ArticlePolicy;
 use App\Policies\UserPolicy;
 use App\Models\Client;
-use App\Policies\CLientPolicy;
+use App\Policies\ClientPolicy;
 
 // use Illuminate\Support\Facades\Gate;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
@@ -24,7 +24,7 @@ class AuthServiceProvider extends ServiceProvider
     protected $policies = [
         Article::class => ArticlePolicy::class,
         User::class => UserPolicy::class,
-        Client::class => CLientPolicy::class
+        Client::class => CLientPolicy::class,
 
 
 

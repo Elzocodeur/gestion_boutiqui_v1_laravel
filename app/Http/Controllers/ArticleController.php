@@ -17,16 +17,51 @@ use Exception;
 use App\Http\Requests\UpdateStockRequest;
 
 
+
+
+
 class ArticleController extends Controller
 {
+    use RestResponseTrait;
 
     public function __construct()
     {
         $this->authorizeResource(Article::class, 'article');
     }
 
-    use RestResponseTrait;
 
+            /**
+     * @OA\Get(
+     *     path="/api/v1/articles",
+     *     tags={"Articles"},
+     *     summary="Obtenir la liste des articles",
+     *     description="Retourne la liste des articles avec des filtres optionnels.",
+     *     @OA\Parameter(
+     *         name="include",
+     *         in="query",
+     *         description="Inclure des relations",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Parameter(
+     *         name="disponible",
+     *         in="query",
+     *         description="Filtrer les articles par disponibilité (oui/non)",
+     *         required=false,
+     *         @OA\Schema(type="string")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Liste des articles retournée avec succès",
+     *         @OA\JsonContent(type="array", @OA\Items(ref="ArticleResource"))
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
+     */
 
     public function index(Request $request)
 {
@@ -59,7 +94,30 @@ class ArticleController extends Controller
 }
 
     /**
-     * Store a newly created resource in storage.
+     * @OA\Post(
+     *     path="/api/v1articles",
+     *     tags={"Articles"},
+     *     summary="Créer un nouvel article",
+     *     description="Ajoute un nouvel article à la base de données.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="StoreArticleRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=201,
+     *         description="Article créé avec succès",
+     *         @OA\JsonContent(ref="ArticleResource")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Requête invalide"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
      */
     public function store(StoreArticleRequest $request)
     {
@@ -74,8 +132,35 @@ class ArticleController extends Controller
 
         }
     }
+
+
         /**
-     * Display the specified resource.
+     * @OA\Get(
+     *     path="/api/v1/articles/{id}",
+     *     tags={"Articles"},
+     *     summary="Afficher un article par ID",
+     *     description="Retourne un article spécifique par son ID.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Article retourné avec succès",
+     *         @OA\JsonContent(ref="ArticleResource")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Article non trouvé"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
      */
     public function show($id){
         $article = Article::find($id);
@@ -83,8 +168,37 @@ class ArticleController extends Controller
         return new ArticleResource($article);
     }
 
-    /**
-     * Update the specified resource in storage.
+        /**
+     * @OA\Put(
+     *     path="/api/v1/articles/{id}",
+     *     tags={"Articles"},
+     *     summary="Mettre à jour un article",
+     *     description="Met à jour un article existant.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="UpdateArticleRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Article mis à jour avec succès",
+     *         @OA\JsonContent(ref="ArticleResource")
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Requête invalide"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
      */
     public function update(UpdateArticleRequest $request, Article $article)
     {
@@ -100,6 +214,32 @@ class ArticleController extends Controller
         }
     }
 
+        /**
+     * @OA\Post(
+     *     path="/api/v1/articles/stock",
+     *     tags={"Articles"},
+     *     summary="Mettre à jour les stocks des articles",
+     *     description="Met à jour les quantités de stock pour plusieurs articles.",
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(type="object", @OA\Property(property="articles", type="array", @OA\Items(ref="UpdateStockRequest")))
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Stocks mis à jour avec succès",
+     *         @OA\JsonContent(type="object", @OA\Property(property="updatedArticles", type="array", @OA\Items(type="object", @OA\Property(property="id", type="integer"), @OA\Property(property="quantite", type="integer"))), @OA\Property(property="notFoundArticles", type="array", @OA\Items(type="object", @OA\Property(property="id", type="integer"), @OA\Property(property="quantite", type="integer"))))
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Requête invalide"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
+     */
     public function updateStock(Request $request)
     {
         $this->authorize('updateStock', Article::class);
@@ -134,7 +274,42 @@ class ArticleController extends Controller
         }
     }
 
-
+        /**
+     * @OA\Patch(
+     *     path="/api/v1/articles/{id}",
+     *     tags={"Articles"},
+     *     summary="Mettre à jour le stock d'un article par ID",
+     *     description="Met à jour la quantité de stock d'un article spécifique.",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(ref="UpdateStockRequest")
+     *     ),
+     *     @OA\Response(
+     *         response=200,
+     *         description="Stock mis à jour avec succès",
+     *         @OA\JsonContent(ref="ArticleResource")
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Article non trouvé"
+     *     ),
+     *     @OA\Response(
+     *         response=400,
+     *         description="Requête invalide"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
+     */
     public function updateStockById(UpdateStockRequest $request, $id): JsonResponse
     {
         $this->authorize('updateStock', Article::class);
@@ -150,8 +325,32 @@ class ArticleController extends Controller
         return $this->sendResponse($article, StatusResponseEnum::SUCCESS, 200, 'Quantité de stock mise à jour');
     }
 
-    /**
-     * Remove the specified resource from storage using soft delete.
+        /**
+     * @OA\Delete(
+     *     path="/api/v1/articles/{id}",
+     *     tags={"Articles"},
+     *     summary="Supprimer un article",
+     *     description="Supprime un article en utilisant la suppression douce (soft delete).",
+     *     @OA\Parameter(
+     *         name="id",
+     *         in="path",
+     *         required=true,
+     *         @OA\Schema(type="integer")
+     *     ),
+     *     @OA\Response(
+     *         response=204,
+     *         description="Article supprimé avec succès"
+     *     ),
+     *     @OA\Response(
+     *         response=404,
+     *         description="Article non trouvé"
+     *     ),
+     *     @OA\Response(
+     *         response=401,
+     *         description="Non autorisé"
+     *     ),
+     *     security={{"Bearer":{}}}
+     * )
      */
     public function destroy(Article $article)
     {

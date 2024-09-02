@@ -10,7 +10,7 @@ class ClientPolicy
 {
     public function viewAny(User $user)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'ADMIN';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     /**
@@ -18,7 +18,7 @@ class ClientPolicy
      */
     public function view(User $user, Client $client)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'ADMIN';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     /**
@@ -26,7 +26,7 @@ class ClientPolicy
      */
     public function create(User $user)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     /**
@@ -34,7 +34,7 @@ class ClientPolicy
      */
     public function update(User $user, Client $client)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     /**
@@ -42,28 +42,28 @@ class ClientPolicy
      */
     public function delete(User $user, Client $client)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     public function showClientByTelephone(User $user)
     {
 
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     public function addUserToClient(User $user, Client $client)
     {
 
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'ADMIN';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     public function listDettesClient(User $user, Client $client)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 
     public function showClientWithUser(User $user, Client $client)
     {
-        return $user->role->name === 'BOUTIQUIER' || $user->role->name === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
     }
 }
