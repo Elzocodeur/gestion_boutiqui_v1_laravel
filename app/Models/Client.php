@@ -22,4 +22,11 @@ class Client extends Model
         return $this->hasMany(Dette::class);
     }
 
+
+        // Ajoutez la méthode booted ici
+        protected static function booted()
+        {
+            static::addGlobalScope(new ClientFilter);
+        }
+
 }

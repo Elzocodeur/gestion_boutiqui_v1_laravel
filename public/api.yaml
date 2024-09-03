@@ -1,0 +1,405 @@
+openapi: 3.0.0
+info:
+  title: API Documentation
+  description: Documentation complète de l'API pour les contrôleurs Article, Auth, Client, et User.
+  version: 1.0.0
+servers:
+  - url: http://127.0.0.1:3000/api
+    description: Local server
+  - url: http://production.app/api
+    description: Production server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    Article:
+      type: object
+      properties:
+        id:
+          type: integer
+        libelle:
+          type: string
+        description:
+          type: string
+        price:
+          type: number
+          format: float
+        qteStock:
+          type: integer
+        disponible:
+          type: boolean
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Client:
+      type: object
+      properties:
+        id:
+          type: integer
+        surname:
+          type: string
+        adresse:
+          type: string
+        telephone:
+          type: string
+        user_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    User:
+      type: object
+      properties:
+        id:
+          type: integer
+        nom:
+          type: string
+        prenom:
+          type: string
+        login:
+          type: string
+        photo:
+          type: string
+        role_id:
+          type: integer
+        active:
+          type: string
+          enum:
+            - OUI
+            - NON
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+security:
+  - bearerAuth: []
+
+paths:
+  /v1/auth/login:
+    post:
+      tags:
+        - Authentification
+      summary: Authentification utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                login:
+                  type: string
+                password:
+                  type: string
+      responses:
+        '200':
+          description: Authentification réussie
+        '401':
+          description: Identifiants incorrects
+
+  /api/v1/auth/logout:
+    post:
+      tags:
+        - Authentification
+      summary: Déconnexion utilisateur
+      responses:
+        '200':
+          description: Déconnexion réussie
+        '401':
+          description: Non authentifié
+
+  /api/v1/articles:
+    get:
+      tags:
+        - Articles
+      summary: Liste tous les articles
+      parameters:
+        - name: disponible
+          in: query
+          description: Filtrer par disponibilité
+          required: false
+          schema:
+            type: boolean
+      responses:
+        '200':
+          description: Liste des articles récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Article'
+
+    post:
+      tags:
+        - Articles
+      summary: Créer un nouvel article
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '201':
+          description: Article créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '403':
+          description: Accès interdit
+
+  /api/v1/articles/{id}:
+    get:
+      tags:
+        - Articles
+      summary: Afficher un article spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Article récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article non trouvé
+
+    patch:
+      tags:
+        - Articles
+      summary: Mettre à jour un article spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Article'
+      responses:
+        '200':
+          description: Article mis à jour avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article non trouvé
+
+    delete:
+      tags:
+        - Articles
+      summary: Supprimer un article spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Article supprimé avec succès
+        '404':
+          description: Article non trouvé
+
+  /api/v1/articles/libelle/{libelle}:
+    post:
+      tags:
+        - Articles
+      summary: Récupérer un article par son libellé
+      parameters:
+        - name: libelle
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Article récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Article'
+        '404':
+          description: Article non trouvé
+
+  /api/v1/articles/stock:
+    post:
+      tags:
+        - Articles
+      summary: Mettre à jour le stock de plusieurs articles
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                articles:
+                  type: array
+                  items:
+                    type: object
+                    properties:
+                      id:
+                        type: integer
+                      quantity:
+                        type: integer
+      responses:
+        '200':
+          description: Stock mis à jour avec succès
+        '500':
+          description: Erreur interne du serveur
+
+  /api/v1/clients:
+    get:
+      tags:
+        - Clients
+      summary: Liste tous les clients
+      responses:
+        '200':
+          description: Liste des clients récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Client'
+
+    post:
+      tags:
+        - Clients
+      summary: Créer un nouveau client
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Client'
+      responses:
+        '201':
+          description: Client créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '500':
+          description: Erreur lors de la création du client
+
+  /api/v1/clients/{id}:
+    get:
+      tags:
+        - Clients
+      summary: Afficher un client spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Client récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Client'
+        '404':
+          description: Client non trouvé
+
+  /api/v1/users:
+    get:
+      tags:
+        - Utilisateurs
+      summary: Liste tous les utilisateurs
+      parameters:
+        - name: role
+          in: query
+          description: Filtrer par rôle (admin ou boutiquier)
+          required: false
+          schema:
+            type: string
+            enum: [admin, boutiquier]
+        - name: active
+          in: query
+          description: Filtrer par statut d'activation (oui ou non)
+          required: false
+          schema:
+            type: string
+            enum: [oui, non]
+      responses:
+        '200':
+          description: Liste des utilisateurs récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+
+    post:
+      tags:
+        - Utilisateurs
+      summary: Créer un nouvel utilisateur
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '201':
+          description: Utilisateur créé avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '403':
+          description: Accès interdit
+
+  /api/v1/users/{id}:
+    get:
+      tags:
+        - Utilisateurs
+      summary: Afficher un utilisateur spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Utilisateur récupéré avec succès
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '404':
+          description: Utilisateur non trouvé
