@@ -52,7 +52,6 @@ class StoreUserRequest extends FormRequest
             'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ];
     }
-
     /**
      * Handle a failed validation attempt.
      */

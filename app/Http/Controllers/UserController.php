@@ -22,45 +22,6 @@ class UserController extends Controller
         $this->authorizeResource(User::class, 'user');
     }
 
-
-
-    /**
-     * @OA\Get(
-     *     path="/api/v1/users",
-     *     operationId="GetAllUsersWithOptionalFilters",
-     *     tags={"AllUsersWithOptionalFilters"},
-     *     summary="Get all users with optional filters",
-     *     description="Récupération des utilisateurs avec possibilité de filtrer par role et/ou par active",
-     *     security={{"bearerAuth":{}}},
-     *     @OA\Parameter(
-     *         name="role",
-     *         in="query",
-     *         description="Filterer les utilisateurs par role (admin ou boutiquier)",
-     *         required=false,
-     *         @OA\Schema(type="string", enum={"admin", "boutiquier"})
-     *     ),
-     *     @OA\Parameter(
-     *         name="active",
-     *         in="query",
-     *         description="Filterer les utilisateurs par status (oui ou non)",
-     *         required=false,
-     *         @OA\Schema(type="string", enum={"oui", "non"})
-     *     ),
-     *     @OA\Response(
-     *         response=200,
-     *         description="Compte utilisateur créé avec succès",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(
-     *         response=422,
-     *         description="Unprocessable Entity",
-     *         @OA\JsonContent()
-     *     ),
-     *     @OA\Response(response=400, description="Bad request"),
-     *     @OA\Response(response=404, description="Resource Not Found"),
-     *     @OA\Response(response=500, description="Internal server error")
-     * )
-     */
     public function index(Request $request)
     {
         $this->authorize('viewAny', User::class);

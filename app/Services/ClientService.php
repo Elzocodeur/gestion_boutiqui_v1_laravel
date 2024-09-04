@@ -17,4 +17,5 @@ interface ClientService
     public function getClientDettes(int $clientId): Collection;
     public function getClientWithUser(int $clientId);
     public function getAllClients(): Collection;
+
 }

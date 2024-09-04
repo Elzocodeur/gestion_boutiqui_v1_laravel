@@ -25,6 +25,7 @@ class ClientController extends Controller
         return new ClientCollection($clients);
     }
 
+
     public function store(StoreClientRequest $request)
     {
         $this->authorize('create', Client::class);
@@ -32,17 +33,28 @@ class ClientController extends Controller
         try {
             DB::beginTransaction();
 
+            // Création du client
             $client = ClientServiceFacade::createClient($request->only('surname', 'adresse', 'telephone'));
 
-            if ($request->has('nom') && $request->has('prenom') && $request->has('login') && $request->has('password')) {
-                ClientServiceFacade::addUserToClient($request->only('nom', 'prenom', 'login', 'password', 'photo', 'role_id'), $client->id);
+            // Ajout de l'utilisateur associé, si les champs sont présents
+            if ($request->has('user')) {
+                $userData = $request->input('user');
+            // dd($request->all());
+
+                // Gérer l'upload de la photo
+                if ($request->hasFile('user.photo')) {
+                    $userData['photo'] = $request->file('user.photo');
+                }
+
+                // Associer l'utilisateur au client
+                $client = ClientServiceFacade::addUserToClient($userData, $client->id);
             }
 
             DB::commit();
-            return $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Client créé avec succès', 201);
+            return $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Client et utilisateur créés avec succès', 201);
         } catch (Exception $e) {
             DB::rollBack();
-            return $this->sendResponse(['error' => $e->getMessage()], StatusResponseEnum::ECHEC, 'Erreur lors de la création du client', 500);
+            return $this->sendResponse(['error' => $e->getMessage()], StatusResponseEnum::ECHEC, 'Erreur lors de la création du client et de l\'utilisateur', 500);
         }
     }
 
@@ -95,6 +107,8 @@ class ClientController extends Controller
 
         return $client
             ? $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Informations du client récupérées avec succès')
+
+
             : $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Client non trouvé', 404);
     }
 }

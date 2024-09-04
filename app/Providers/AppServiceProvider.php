@@ -12,6 +12,7 @@ use App\Repositories\ClientRepository;
 use App\Repositories\ClientRepositoryImplement;
 use App\Services\ClientService;
 use App\Services\ClientServiceImplement;
+use App\Services\UploadService;
 
 use Illuminate\Support\ServiceProvider;
 
@@ -25,15 +26,37 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton(ArticleRepository::class, ArticleRepositoryImplemente::class);
         $this->app->singleton(ArticleService::class, ArticleServicesImplemente::class);
 
+        // methode 1
         // $this->app->bind(ClientRepository::class, ClientRepositoryImplement::class);
         // $this->app->bind(ClientService::class, ClientServiceImplement::class);
 
-        $this->app->singleton('client-repository', function () {
-            return new ClientRepositoryImplement();
+
+        // methode 2
+        // $this->app->singleton('client-repository', function () {
+        //     return new ClientRepositoryImplement();
+        // });
+
+        // $this->app->singleton('client-service', function ($app) {
+        //     return new ClientServiceImplement($app->make('client-repository'));
+        // });
+
+
+            // methode 3
+
+                    // Enregistrement du dépôt client
+        $this->app->singleton(ClientRepository::class, ClientRepositoryImplement::class);
+
+        // Enregistrement du service d'upload
+        $this->app->singleton(UploadService::class, function ($app) {
+            return new UploadService();
         });
 
+        // Enregistrement du service client en liant l'interface à l'implémentation
         $this->app->singleton('client-service', function ($app) {
-            return new ClientServiceImplement($app->make('client-repository'));
+            return new ClientServiceImplement(
+                $app->make(ClientRepository::class),
+                $app->make(UploadService::class)
+            );
         });
     }
 
