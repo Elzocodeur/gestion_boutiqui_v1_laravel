@@ -9,6 +9,7 @@
     <p>Nom: {{ $user->nom }}</p>
     <p>Prénom: {{ $user->prenom }}</p>
     <p>Login: {{ $user->login }}</p>
-    {{-- <img src="{{ $qrCodeBase64 }}" alt="QR Code"> --}}
+    {{-- {{ $qrCodeBase64 }} --}}
+    <img src="{{ $monQrcode }}" alt="QR Code">
 </body>
 </html>

@@ -20,8 +20,7 @@ use BaconQrCode\Renderer\ImageRenderer;
 use BaconQrCode\Renderer\RendererStyle\RendererStyle;
 use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Writer;
-
-
+use Mpdf\Mpdf;
 
 class ClientServiceImplement implements ClientService
 {
@@ -142,23 +141,33 @@ class ClientServiceImplement implements ClientService
 
             $writer = new Writer($renderer);
             $qrCodeContent = $writer->writeString($qrData);
-
+            // dd($qrCodeContent);
             // Encoder le QR code en base64
-            $qrCodeBase64 = 'data:image/svg+xml;base64,' . base64_encode($qrCodeContent);
-
+            $monQrcode = 'data:image/svg+xml;base64,' . base64_encode($qrCodeContent);
+            // dd($qrCodeBase64);
             // Générer la carte de fidélité en PDF
-            $pdf = new TCPDF();
-            $pdf->AddPage();
+            //     $pdf = new TCPDF();
+            //     $pdf->AddPage();
+            //     $pdf->SetFont('helvetica', '', 12);
 
-            // Transmettre $qrCodeBase64 à la vue
-            $html = view('pdf.loyalty_card', compact('user', 'client', 'qrCodeBase64'))->render();
-            // dd($html);
+            //     // dd($qrCodeBase64);
+            //     // Générer le contenu HTML pour le PDF
+            $html = view('pdf.loyalty_card', compact('user', 'monQrcode'))->render();
+            //     $pdf->writeHTML($html, true, false, true, false, '');
 
-            $pdfPath = 'loyalty_cards/' . $user->login . '.pdf';
-            Storage::disk('public')->put($pdfPath, $pdf->Output($pdfPath, 'S'));
+
+            //     // Définir le chemin du PDF et enregistrer le fichier
+                 $pdfPath = 'loyalty_cards/' . $user->login . '.pdf';
+            //     $pdfContent = $pdf->Output($pdfPath, 'S');
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
+
+            // Output the PDF (you can save it to a file or display in the browser)
+            $pdfContent = $mpdf->Output('example.pdf', 'S');
+            // Storage::disk('public')->put($pdfPath, $pdfContent);
 
             // Envoyer l'email avec la carte de fidélité en pièce jointe
-            Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath));
+            Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath, $pdfContent));
 
             return $client;
 

@@ -53,21 +53,23 @@ class LoyaltyCardMail extends Mailable
 
     public $user;
     public $pdfPath;
+    public $pdfContent;
 
-    public function __construct($user, $pdfPath)
+    public function __construct($user, $pdfPath,$pdfContent)
     {
         $this->user = $user;
         $this->pdfPath = $pdfPath;
+        $this->pdfContent = $pdfContent;
     }
 
     public function build()
     {
-        return $this->view('pdf.loyalty_card')
-                    ->attach(storage_path('app/public/' . $this->pdfPath), [
-                        'as' => 'carte_fidelite.pdf',
-                        'mime' => 'application/pdf',
-                    ])
-                    ->subject('Votre carte de fidélité'); // Assurez-vous que le sujet est défini
+        return $this->view('mails.carte')
+            ->subject('Votre PDF Généré')
+            ->attachData($this->pdfContent, 'example.pdf', [
+                'mime' => 'application/pdf',
+            ]);
     }
 }
+
 
