@@ -1,7 +1,7 @@
 <?php
 
 // app/Jobs/UploadPhotoToCloudinary.php
-namespace App\Jobs;
+// namespace App\Jobs;
 
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Bus\Queueable;
@@ -77,24 +77,27 @@ class UploadPhotoToCloudinary implements ShouldQueue
 // use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 // use Illuminate\Support\Facades\Storage;
 
-// class GenerateQrCodeAndSendEmailUploadPhotoToCloudinary implements ShouldQueue
+// class UploadPhotoToCloudinary implements ShouldQueue
 // {
 //     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
-//     public $userId;
+//     protected $userId;
 //     // public $userData;
-//     public $photoPath;
+//     protected $photoPath;
 
 
 //     public function __construct($userId,  $photoPath)
 //     {
 //         $this->userId = $userId;
 //         // $this->userData = $userData;
-//         $this->$photoPath;
+//         $this->$photoPath= $photoPath;
+//         dd($this->$photoPath );
 //     }
 
 //     public function handle()
 //     {
+//         dd($this->photoPath );
+//         Log::info('Client non trouvé pour l\'utilisateur ID : ');
 //         $user = User::find($this->userId);
 //         $client = $user->client;
 
@@ -143,32 +146,18 @@ class UploadPhotoToCloudinary implements ShouldQueue
 
 //             // Envoyer l'email avec la carte de fidélité en pièce jointe
 //             Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath, $pdfContent));
-
 //             // Si une photo est présente, tenter l'upload sur Cloudinary
-//             if ($user->photo && file_exists($user->photo)) {
+//             if ($user->photo ) {
+//                 // dd( file_exists($user->photo) );
 
 //                 try {
-//                     // Upload vers Cloudinary
-//                     // $uploadedFileUrl = Cloudinary::upload($this->userData['photo']->getRealPath())->getSecurePath();
-
-//                     // // Mettre à jour l'utilisateur avec l'URL de la photo Cloudinary
-//                     // $user = User::find($this->userId);
-//                     // $user->photo = $uploadedFileUrl;
-
-
+//                     dd( $this->photoPath);
 //                     $uploadedFileUrl = Cloudinary::upload(storage_path('app/public/' . $this->photoPath))->getSecurePath();
 
 //                     // Mettre à jour l'utilisateur avec l'URL de la photo Cloudinary
 //                     $user->photo = $uploadedFileUrl;
 //                     $user->save();
 //                 } catch (\Exception $e) {
-//                     // Si l'upload Cloudinary échoue, sauvegarder en local
-//                     // $localPath = $this->userData['photo']->store('user_images', 'public');
-//                     // $user = User::find($this->userId);
-//                     // $user->photo = Storage::url($localPath);
-//                     // $user->save();
-
-//                     // $user->photo = Storage::disk('public')->url($this->photoPath);
 //                     $user->save();
 //                 }
 //             }

@@ -25,7 +25,7 @@ use App\Events\UserCreatedEvent;
 use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Event;
 use App\Exceptions\ExceptionService;
-use App\Jobs\GenerateQrCodeAndSendEmailUploadPhotoToCloudinary;
+use App\Jobs\UploadPhotoToCloudinary;
 
 
 
@@ -117,33 +117,33 @@ class ClientServiceImplement implements ClientService
             // logui deplacer dans le l'observateur
 
             // Générer le QR code et la carte de fidélité comme avant
-            // $qrData = json_encode([
-            //     'nom' => $user->nom,
-            //     'prenom' => $user->prenom,
-            //     'login' => $user->login,
-            //     'telephone' => $client->telephone,
-            //     'adresse' => $client->adresse,
-            // ]);
+            $qrData = json_encode([
+                'nom' => $user->nom,
+                'prenom' => $user->prenom,
+                'login' => $user->login,
+                'telephone' => $client->telephone,
+                'adresse' => $client->adresse,
+            ]);
 
-            // $renderer = new ImageRenderer(
-            //     new RendererStyle(400),
-            //     new SvgImageBackEnd()
-            // );
+            $renderer = new ImageRenderer(
+                new RendererStyle(400),
+                new SvgImageBackEnd()
+            );
 
-            // $writer = new Writer($renderer);
-            // $qrCodeContent = $writer->writeString($qrData);
-            // $monQrcode = 'data:image/svg+xml;base64,' . base64_encode($qrCodeContent);
+            $writer = new Writer($renderer);
+            $qrCodeContent = $writer->writeString($qrData);
+            $monQrcode = 'data:image/svg+xml;base64,' . base64_encode($qrCodeContent);
 
-            // $html = view('pdf.loyalty_card', compact('user', 'monQrcode'))->render();
+            $html = view('pdf.loyalty_card', compact('user', 'monQrcode'))->render();
 
-            // $pdfPath = 'loyalty_cards/' . $user->login . '.pdf';
-            // $mpdf = new Mpdf();
-            // $mpdf->WriteHTML($html);
+            $pdfPath = 'loyalty_cards/' . $user->login . '.pdf';
+            $mpdf = new Mpdf();
+            $mpdf->WriteHTML($html);
 
-            // $pdfContent = $mpdf->Output($pdfPath, 'S');
+            $pdfContent = $mpdf->Output($pdfPath, 'S');
 
-            // // Envoyer l'email avec la carte de fidélité en pièce jointe
-            // Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath, $pdfContent));
+            // Envoyer l'email avec la carte de fidélité en pièce jointe
+            Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath, $pdfContent));
 
             return $client;
 
@@ -156,9 +156,12 @@ class ClientServiceImplement implements ClientService
 
 
 
+
+
 //     public function addUserToClient(array $userData, $clientId)
 // {
 //     try {
+
 //         $client = $this->getClientById($clientId);
 //         if (!$client) {
 //             throw new ExceptionService('Client non trouvé');
@@ -182,38 +185,14 @@ class ClientServiceImplement implements ClientService
 //         // Association de l'utilisateur au client
 //         $client->user_id = $user->id;
 //         $client->save();
-
-//         // Si une photo est présente, l'upload est déclenché dans un job
-//         // if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
-//         //         try {
-//         //             // Upload de la photo sur Cloudinary
-//         //             $uploadedFileUrl = Cloudinary::upload($userData['photo']->getRealPath())->getSecurePath();
-
-//         //             // Mettre à jour le chemin de la photo dans la base de données (lien Cloudinary)
-//         //             $user->photo = $uploadedFileUrl;
-
-//         //         } catch (ExceptionService $e) {
-//         //             // En cas d'échec de Cloudinary, enregistrer la photo en local
-//         //             $localPath = $userData['photo']->store('user_images', 'public');
-
-//         //             // Mettre à jour le chemin local dans la base de données
-//         //             // $user->photo = Storage::disk('public')->url($localPath); // URL locale
-//         //         }
-//         // }
-//         // // Dispatch the job for uploading photo
-//         // GenerateQrCodeAndSendEmailUploadPhotoToCloudinary::dispatch($userData, $user->id);
-
-
-
 //         // methode 2
 //         if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
 //             // Stocker la photo localement
 //             $storedPhotoPath = $userData['photo']->store('user_images_temp', 'public');
 
 //             // Dispatch the job for uploading photo
-//             // GenerateQrCodeAndSendEmailUploadPhotoToCloudinary::dispatch($storedPhotoPath, $user->id);
-//             // Dans votre service ou listener
-//             // GenerateQrCodeAndSendEmailUploadPhotoToCloudinary::dispatch($userData['photo']->store('user_images', 'public'), $user->id);
+//             UploadPhotoToCloudinary::dispatch($user->id,$storedPhotoPath);
+//             dd($storedPhotoPath);
 
 //         }
 
@@ -226,6 +205,8 @@ class ClientServiceImplement implements ClientService
 //         throw $e;
 //     }
 // }
+
+
 
     public function getClientWithUser($id)
     {
