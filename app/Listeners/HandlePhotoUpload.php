@@ -1,19 +1,34 @@
 <?php
 
-// app/Listeners/HandlePhotoUpload.php
 namespace App\Listeners;
 
-use App\Events\PhotoUploadEvent;
+use Illuminate\Contracts\Queue\ShouldQueue;
+use Illuminate\Queue\InteractsWithQueue;
 use App\Jobs\UploadPhotoToCloudinary;
+use App\Events\UserCreatedEvent;
+use App\Models\User;
 
 class HandlePhotoUpload
 {
-    public function handle(PhotoUploadEvent $event)
+    /**
+     * Create the event listener.
+     */
+    public function __construct()
     {
-        $userData = $event->userData;
+        //
+    }
 
-        // Lancer le job asynchrone pour uploader la photo
-        UploadPhotoToCloudinary::dispatch($userData, $userData['user_id']);
+    /**
+     * Handle the event.
+     */
+    public function handle(UserCreatedEvent $event)
+    {
+        // Récupérer l'utilisateur via l'ID
+        $user = User::find($event->userId);
+
+        if ($user) {
+            // Lancer le job asynchrone pour uploader la photo et générer le QR code, PDF et envoyer l'email
+            UploadPhotoToCloudinary::dispatch($user);
+        }
     }
 }
-
