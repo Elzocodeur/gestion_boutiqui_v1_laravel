@@ -5,7 +5,8 @@ namespace App\Repositories;
 
 use App\Models\Client;
 use Illuminate\Database\Eloquent\Collection;
-
+use Illuminate\Support\Facades\DB;
+use Exception;
 class ClientRepositoryImplement implements ClientRepository
 {
     public function create(array $data)
@@ -66,4 +67,27 @@ class ClientRepositoryImplement implements ClientRepository
     {
         return Client::all();
     }
+
+
+    // ClientRepositoryImplement.php
+public function storeClientWithUserTransaction(array $data, array $userData = null)
+{
+    DB::beginTransaction();
+    try {
+        // Création du client
+        $client = $this->create($data);
+
+        // Si les données de l'utilisateur sont présentes
+        if ($userData) {
+            $this->addUserToClient($client, $userData);
+        }
+
+        DB::commit();
+        return $client;
+    } catch (Exception $e) {
+        DB::rollBack();
+        throw $e;
+    }
+}
+
 }

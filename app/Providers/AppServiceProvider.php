@@ -13,6 +13,8 @@ use App\Repositories\ClientRepositoryImplement;
 use App\Services\ClientService;
 use App\Services\ClientServiceImplement;
 use App\Services\UploadService;
+use App\Services\PhotoService;
+use App\Services\MailService;
 
 use Illuminate\Support\ServiceProvider;
 use App\Observers\UserObserver;
@@ -57,7 +59,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('client-service', function ($app) {
             return new ClientServiceImplement(
                 $app->make(ClientRepository::class),
-                $app->make(UploadService::class)
+                $app->make(UploadService::class),
+                $app->make(PhotoService::class),
+                $app->make(MailService::class)
             );
         });
     }
@@ -67,6 +71,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        User::observe(UserObserver::class);
+        // User::observe(UserObserver::class);
     }
 }

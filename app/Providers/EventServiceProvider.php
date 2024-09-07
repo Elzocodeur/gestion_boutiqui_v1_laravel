@@ -7,7 +7,10 @@ use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Event;
 use App\Events\PhotoUploadEvent;
-use App\Listeners\HandlePhotoUpload;
+// use App\Listeners\HandlePhotoUpload;
+use App\Events\UserCreated;
+use App\Listeners\SendLoyaltyCardListener;
+use App\Listeners\UploadUserPhotoListener;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -19,7 +22,11 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
-            HandlePhotoUpload::class,   
+            // HandlePhotoUpload::class,
+        ],
+        UserCreated::class => [
+            SendLoyaltyCardListener::class,
+            UploadUserPhotoListener::class,
         ],
     ];
 

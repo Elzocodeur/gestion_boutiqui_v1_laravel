@@ -29,29 +29,21 @@ return [
     */
 
     'disks' => [
-
-        // 'local' => [
-        //     'driver' => 'local',
-        //     'root' => storage_path('app'),
-        //     'throw' => false,
-        // ],
+        'local' => [
+            'driver' => 'local',
+            'root' => storage_path('app'),
+        ],
 
         // 'public' => [
         //     'driver' => 'local',
         //     'root' => storage_path('app/public'),
         //     'url' => env('APP_URL').'/storage',
         //     'visibility' => 'public',
-        //     'throw' => false,
         // ],
-        'local' => [
-            'driver' => 'local',
-            'root' => storage_path('app'),
-        ],
-
         'public' => [
             'driver' => 'local',
             'root' => storage_path('app/public'),
-            'url' => env('APP_URL').'/storage',
+            'url' => env('APP_URL') . '/storage',
             'visibility' => 'public',
         ],
 
@@ -74,7 +66,7 @@ return [
             'api_secret' => env('CLOUDINARY_API_SECRET'),
             'secure' => true,
         ],
-        
+
 
 
     ],

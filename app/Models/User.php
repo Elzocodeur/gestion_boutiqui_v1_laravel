@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Laravel\Passport\HasApiTokens; // Importez le trait ici
+use App\Observers\UserObserver;
 
 class User extends Authenticatable
 {
@@ -26,6 +27,13 @@ class User extends Authenticatable
         'active',
         'role_id',
     ];
+
+
+    protected static function boot()
+    {
+        parent::boot();
+        self::observe(UserObserver::class);  // Observer rattaché ici
+    }
 
     /**
      * The attributes that should be hidden for serialization.

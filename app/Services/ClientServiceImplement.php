@@ -22,10 +22,16 @@ use BaconQrCode\Renderer\Image\SvgImageBackEnd;
 use BaconQrCode\Writer;
 use Mpdf\Mpdf;
 use App\Events\UserCreatedEvent;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+    use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
 use Illuminate\Support\Facades\Event;
 use App\Exceptions\ExceptionService;
 use App\Jobs\UploadPhotoToCloudinary;
+use App\Events\PhotoUploadEvent;
+use App\Enums\StatusResponseEnum;
+
+
+
+
 
 
 
@@ -33,11 +39,15 @@ class ClientServiceImplement implements ClientService
 {
     protected $clientRepository;
     protected $uploadService;
+    protected $photoService;
+    protected $mailService;
 
-    public function __construct(ClientRepository $clientRepository, UploadService $uploadService)
+    public function __construct(ClientRepository $clientRepository, UploadService $uploadService, PhotoService $photoService, MailService $mailService)
     {
         $this->clientRepository = $clientRepository;
         $this->uploadService = $uploadService;
+        $this->photoService = $photoService;
+        $this->mailService = $mailService;
     }
 
     public function createClient(array $data)
@@ -62,149 +72,106 @@ class ClientServiceImplement implements ClientService
 
 
 
+
+
+
+
+
+    // debut-------------
     public function addUserToClient(array $userData, $clientId)
+
+
+
     {
         try {
             $client = $this->getClientById($clientId);
             if (!$client) {
-                throw new ExceptionService('Client non trouvé');
+                throw new Exception('Client non trouvé');
             }
 
             if ($client->user_id) {
-                throw new ExceptionService('Le client a déjà un compte utilisateur');
+                throw new Exception('Le client a déjà un compte utilisateur');
             }
 
-            // Initialiser la variable pour le chemin de la photo
-            $photoPath = true;
+            // Création du compte utilisateur
+            // $photopaph = true;
             $user = User::create([
                 'nom' => $userData['nom'],
                 'prenom' => $userData['prenom'],
                 'login' => $userData['login'],
                 'password' => Hash::make($userData['password']),
-                'photo' => $photoPath, // sera mis à jour plus tard
+                'photo' => '',
                 'role_id' => $userData['role_id'],
             ]);
 
-            // Associer l'utilisateur au client
+
+
+            // Association de l'utilisateur au client
             $client->user_id = $user->id;
             $client->save();
 
-            // Si une photo est présente, tenter l'upload sur Cloudinary
+            // Gérer l'upload de la photo
             if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
-                try {
-                    // Upload de la photo sur Cloudinary
-                    $uploadedFileUrl = Cloudinary::upload($userData['photo']->getRealPath())->getSecurePath();
-
-                    // Mettre à jour le chemin de la photo dans la base de données (lien Cloudinary)
-                    $user->photo = $uploadedFileUrl;
-
-                } catch (ExceptionService $e) {
-                    // En cas d'échec de Cloudinary, enregistrer la photo en local
-                    $localPath = $userData['photo']->store('user_images', 'public');
-
-                    // Mettre à jour le chemin local dans la base de données
-                    // $user->photo = Storage::disk('public')->url($localPath); // URL locale
-                }
-
-                // Sauvegarder l'utilisateur avec le chemin de la photo mis à jour
-                $user->save();
+                $this->photoService->uploadPhoto($user, $userData['photo']);
             }
 
-            Event::dispatch('eloquent.created: ' . User::class, $user);
+            // Génération du QR code et de la carte de fidélité
+            $this->mailService->sendLoyaltyCard($user, $client);
 
-
-
-            // logui deplacer dans le l'observateur
-
-            // Générer le QR code et la carte de fidélité comme avant
-            $qrData = json_encode([
-                'nom' => $user->nom,
-                'prenom' => $user->prenom,
-                'login' => $user->login,
-                'telephone' => $client->telephone,
-                'adresse' => $client->adresse,
-            ]);
-
-            $renderer = new ImageRenderer(
-                new RendererStyle(400),
-                new SvgImageBackEnd()
-            );
-
-            $writer = new Writer($renderer);
-            $qrCodeContent = $writer->writeString($qrData);
-            $monQrcode = 'data:image/svg+xml;base64,' . base64_encode($qrCodeContent);
-
-            $html = view('pdf.loyalty_card', compact('user', 'monQrcode'))->render();
-
-            $pdfPath = 'loyalty_cards/' . $user->login . '.pdf';
-            $mpdf = new Mpdf();
-            $mpdf->WriteHTML($html);
-
-            $pdfContent = $mpdf->Output($pdfPath, 'S');
-
-            // Envoyer l'email avec la carte de fidélité en pièce jointe
-            Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath, $pdfContent));
 
             return $client;
-
-        } catch (ExceptionService $e) {
-            throw $e;
+        } catch (Exception $e) {
+            throw new ExceptionService('Erreur lors de l\'ajout de l\'utilisateur au client: ' . $e->getMessage());
         }
     }
 
+    // private function handlePhotoUpload(User $user, $photo)
+    // {
+    //     try {
+    //         $uploadedFileUrl = Cloudinary::upload($photo->getRealPath())->getSecurePath();
+    //         $user->photo = $uploadedFileUrl;
+    //         $user->is_photo_on_cloudinary = true;
+    //     } catch (Exception $e) {
+    //         // Sauvegarde en local en cas d'échec
+    //         $localPath = $photo->store('user_images', 'public');
+    //         $user->photo = $localPath;
+    //         $user->is_photo_on_cloudinary = false;
+    //     }
+
+    //     $user->save();
+    // }
 
 
 
 
+    // private function generateLoyaltyCard(User $user, Client $client)
+    // {
+    //     // Générer le QR code
+    //     $qrData = json_encode([
+    //         'nom' => $user->nom,
+    //         'prenom' => $user->prenom,
+    //         'login' => $user->login,
+    //         'telephone' => $client->telephone,
+    //         'adresse' => $client->adresse,
+    //     ]);
 
+    //     $renderer = new ImageRenderer(new RendererStyle(400), new SvgImageBackEnd());
+    //     $writer = new Writer($renderer);
+    //     $qrCodeContent = $writer->writeString($qrData);
+    //     $monQrcode = 'data:image/svg+xml;base64,' . base64_encode($qrCodeContent);
 
-//     public function addUserToClient(array $userData, $clientId)
-// {
-//     try {
+    //     // Génération du PDF
+    //     $html = view('pdf.loyalty_card', compact('user', 'monQrcode'))->render();
+    //     $pdfPath = 'loyalty_cards/' . $user->login . '.pdf';
+    //     $mpdf = new Mpdf();
+    //     $mpdf->WriteHTML($html);
+    //     $pdfContent = $mpdf->Output($pdfPath, 'S');
 
-//         $client = $this->getClientById($clientId);
-//         if (!$client) {
-//             throw new ExceptionService('Client non trouvé');
-//         }
+    //     // Envoi de l'email avec la carte de fidélité
+    //     Mail::to($user->login)->send(new LoyaltyCardMail($user, $pdfPath, $pdfContent));
+    // }
+    // fin-------------
 
-//         if ($client->user_id) {
-//             throw new ExceptionService('Le client a déjà un compte utilisateur');
-//         }
-
-//         $photoPath = true;
-//         // Création du compte utilisateur
-//         $user = User::create([
-//             'nom' => $userData['nom'],
-//             'prenom' => $userData['prenom'],
-//             'login' => $userData['login'],
-//             'password' => Hash::make($userData['password']),
-//             'photo' => $photoPath, // La photo sera mise à jour plus tard
-//             'role_id' => $userData['role_id'],
-//         ]);
-
-//         // Association de l'utilisateur au client
-//         $client->user_id = $user->id;
-//         $client->save();
-//         // methode 2
-//         if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
-//             // Stocker la photo localement
-//             $storedPhotoPath = $userData['photo']->store('user_images_temp', 'public');
-
-//             // Dispatch the job for uploading photo
-//             UploadPhotoToCloudinary::dispatch($user->id,$storedPhotoPath);
-//             dd($storedPhotoPath);
-
-//         }
-
-//         // Déclencher un événement pour générer le QR code, PDF, et envoyer l'email
-//         event(new UserCreatedEvent($user->id));
-
-//         return $client;
-
-//     } catch (ExceptionService $e) {
-//         throw $e;
-//     }
-// }
 
 
 
@@ -238,4 +205,33 @@ class ClientServiceImplement implements ClientService
         return $this->clientRepository->getAll();
     }
 
+
+
+
+    public function storeClientWithUser(array $data)
+    {
+        DB::beginTransaction();
+        try {
+            // Création du client
+            $client = $this->createClient($data);
+
+            // Ajout de l'utilisateur associé, si les données de l'utilisateur sont présentes
+            if (isset($data['user'])) {
+                $client = $this->addUserToClient($data['user'], $client->id);
+            }
+
+            DB::commit();
+            return [
+                'status' => StatusResponseEnum::SUCCESS,
+                'client' => $client,
+                'message' => 'Client et utilisateur créés avec succès'
+            ];
+        } catch (Exception $e) {
+            DB::rollBack();
+            return [
+                'status' => StatusResponseEnum::ECHEC,
+                'message' => $e->getMessage()
+            ];
+        }
+    }
 }

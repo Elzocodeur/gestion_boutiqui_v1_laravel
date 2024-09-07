@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use App\Observers\UserObserver;
 
 class Client extends Model
 {
@@ -12,6 +13,9 @@ class Client extends Model
     protected $fillable = ['surname','telephone', 'adresse', 'user_id'];
 
     protected $hidden = ['created_at', 'updated_at'];
+
+
+
 
     public function user()
     {

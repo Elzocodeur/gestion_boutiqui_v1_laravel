@@ -26,37 +26,55 @@ class ClientController extends Controller
     }
 
 
-    public function store(StoreClientRequest $request)
-    {
-        $this->authorize('create', Client::class);
+// public function store(StoreClientRequest $request)
+    // {
+    //     $this->authorize('create', Client::class);
 
-        try {
-            DB::beginTransaction();
+    //     try {
+    //         DB::beginTransaction();
 
-            // Création du client
-            $client = ClientServiceFacade::createClient($request->only('surname', 'adresse', 'telephone'));
+    //         // Création du client
+    //         $client = ClientServiceFacade::createClient($request->only('surname', 'adresse', 'telephone'));
 
-            // Ajout de l'utilisateur associé, si les champs sont présents
-            if ($request->has('user')) {
-                $userData = $request->input('user');
-            // dd($request->all());
+    //         // Ajout de l'utilisateur associé, si les champs sont présents
+    //         if ($request->has('user')) {
+    //             $userData = $request->input('user');
+    //             // dd($request->all());
 
-                // Gérer l'upload de la photo
-                if ($request->hasFile('user.photo')) {
-                    $userData['photo'] = $request->file('user.photo');
-                }
+    //             // Gérer l'upload de la photo
+    //             if ($request->hasFile('user.photo')) {
+    //                 $userData['photo'] = $request->file('user.photo');
+    //             }
 
-                // Associer l'utilisateur au client
-                $client = ClientServiceFacade::addUserToClient($userData, $client->id);
+    //             // Associer l'utilisateur au client
+    //             $client = ClientServiceFacade::addUserToClient($userData, $client->id);
+    //         }
+
+    //         DB::commit();
+    //         return $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Client et utilisateur créés avec succès', 201);
+    //     } catch (Exception $e) {
+    //         DB::rollBack();
+    //         return $this->sendResponse(['error' => $e->getMessage()], StatusResponseEnum::ECHEC, 'Erreur lors de la création du client et de l\'utilisateur', 500);
+    //     }
+    // }
+
+
+        public function store(StoreClientRequest $request)
+        {
+            $this->authorize('create', Client::class);
+
+            // Appel au service pour gérer la logique de création du client
+            $response = ClientServiceFacade::storeClientWithUser($request->only('surname', 'adresse', 'telephone', 'user'));
+
+            if ($response['status'] === StatusResponseEnum::SUCCESS) {
+                return $this->sendResponse(new ClientResource($response['client']), $response['status'], $response['message'], 201);
+            } else {
+                return $this->sendResponse(['error' => $response['message']], $response['status'], 'Erreur lors de la création du client et de l\'utilisateur', 500);
             }
-
-            DB::commit();
-            return $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Client et utilisateur créés avec succès', 201);
-        } catch (Exception $e) {
-            DB::rollBack();
-            return $this->sendResponse(['error' => $e->getMessage()], StatusResponseEnum::ECHEC, 'Erreur lors de la création du client et de l\'utilisateur', 500);
         }
-    }
+
+
+
 
     public function show(string $id)
     {
@@ -65,6 +83,8 @@ class ClientController extends Controller
 
         return new ClientResource($client);
     }
+
+
 
     public function showClientByTelephone(Request $request)
     {
@@ -80,6 +100,8 @@ class ClientController extends Controller
             ? new ClientResource($client)
             : $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Client non trouvé', 404);
     }
+
+
 
     public function addUserToClient(UpdateClientCompteRequest $request, $id)
     {
@@ -99,6 +121,7 @@ class ClientController extends Controller
         return $this->sendResponse($dettes, StatusResponseEnum::SUCCESS, 'Liste des dettes récupérée avec succès');
     }
 
+
     public function showClientWithUser($id)
     {
         $this->authorize('view', Client::class);
@@ -111,4 +134,5 @@ class ClientController extends Controller
 
             : $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Client non trouvé', 404);
     }
+
 }
