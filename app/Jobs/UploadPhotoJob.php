@@ -8,52 +8,29 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Bus\Queueable;
-use CloudinaryLabs\CloudinaryLaravel\Facades\Cloudinary;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\File;
 
-
-class UploadPhotoJob   implements   ShouldQueue
+class UploadPhotoJob implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    // protected $user;
-    // protected $photo;
-
-    // public function __construct(User $user, $photo)
-    // {
-    //     $this->user = $user;
-    //     $this->photo = $photo;
-    // }
-
-    // public function handle(PhotoService $photoService)
-    // {
-    //     $photoService->uploadPhoto($this->user, $this->photo);
-    // }
-
 
     public $user;
     public $photo;
 
-    public function __construct(User $user, $photo)
+    public function __construct(User $user,   $photo)
     {
         $this->user = $user;
         $this->photo = $photo;
     }
 
-    public function handle()
+    public function handle(PhotoService $photoService)
     {
-        try {
-            // Upload vers Cloudinary
-            $uploadedFileUrl = Cloudinary::upload($this->photo->getRealPath())->getSecurePath();
-
-            // Mise à jour du chemin de la photo (Cloudinary)
-            $this->user->photo = $uploadedFileUrl;
-            $this->user->is_photo_on_cloudinary = true;
-            $this->user->save();
-        } catch (\Exception $e) {
-            // En cas d'échec, sauvegarder la photo localement
-            $path = $this->photo->store('public/photos');
-            $this->user->photo = $path;
-            $this->user->is_photo_on_cloudinary = false;
-            $this->user->save();
-        }
+        dd($photoService);
+        Log::info("Job UploadPhotoJob pour l'utilisateur : " );
+        $photoService->uploadPhoto($this->user, $this->photo);
     }
+
+
 }
+

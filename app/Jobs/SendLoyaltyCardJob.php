@@ -9,11 +9,13 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
+
 
 class SendLoyaltyCardJob  implements ShouldQueue
 {
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
-    
+
     // protected $user;
     // protected $client;
 
@@ -40,6 +42,7 @@ class SendLoyaltyCardJob  implements ShouldQueue
 
     public function handle(MailService $mailService)
     {
+        Log::info("Job SendLoyaltyCardJob pour l'utilisateur : " . $this->user->id);
         $mailService->sendLoyaltyCard($this->user, $this->client);
     }
 }

@@ -26,7 +26,7 @@ class ClientController extends Controller
     }
 
 
-// public function store(StoreClientRequest $request)
+    // public function store(StoreClientRequest $request)
     // {
     //     $this->authorize('create', Client::class);
 
@@ -59,19 +59,21 @@ class ClientController extends Controller
     // }
 
 
-        public function store(StoreClientRequest $request)
-        {
-            $this->authorize('create', Client::class);
 
-            // Appel au service pour gérer la logique de création du client
-            $response = ClientServiceFacade::storeClientWithUser($request->only('surname', 'adresse', 'telephone', 'user'));
+    
+    public function store(StoreClientRequest $request)
+    {
+        $this->authorize('create', Client::class);
 
-            if ($response['status'] === StatusResponseEnum::SUCCESS) {
-                return $this->sendResponse(new ClientResource($response['client']), $response['status'], $response['message'], 201);
-            } else {
-                return $this->sendResponse(['error' => $response['message']], $response['status'], 'Erreur lors de la création du client et de l\'utilisateur', 500);
-            }
+        // Appel au service pour gérer la logique de création du client
+        $response = ClientServiceFacade::storeClientWithUser($request->only('surname', 'adresse', 'telephone', 'user'));
+
+        if ($response['status'] === StatusResponseEnum::SUCCESS) {
+            return $this->sendResponse(new ClientResource($response['client']), $response['status'], $response['message'], 201);
+        } else {
+            return $this->sendResponse(['error' => $response['message']], $response['status'], 'Erreur lors de la création du client et de l\'utilisateur', 500);
         }
+    }
 
 
 
@@ -112,6 +114,8 @@ class ClientController extends Controller
         return $this->sendResponse(new ClientResource($client), StatusResponseEnum::SUCCESS, 'Compte utilisateur ajouté avec succès au client.');
     }
 
+
+
     public function listDettesClient($id)
     {
         $this->authorize('view', Client::class);
@@ -134,5 +138,6 @@ class ClientController extends Controller
 
             : $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Client non trouvé', 404);
     }
+
 
 }

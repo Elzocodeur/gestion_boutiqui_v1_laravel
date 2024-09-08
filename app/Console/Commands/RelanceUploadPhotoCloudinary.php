@@ -43,8 +43,6 @@
 //     }
 // }
 
-
-namespace App\Console\Commands;
 namespace App\Console\Commands;
 
 use App\Models\User;
@@ -90,7 +88,6 @@ class RelanceUploadPhotoCloudinary extends Command
                 $this->error("Échec de l'upload de la photo pour {$user->nom}");
             }
         }
-
         $this->info("Processus de relance terminé.");
     }
 }

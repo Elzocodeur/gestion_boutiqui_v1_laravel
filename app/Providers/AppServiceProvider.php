@@ -59,9 +59,9 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('client-service', function ($app) {
             return new ClientServiceImplement(
                 $app->make(ClientRepository::class),
-                $app->make(UploadService::class),
-                $app->make(PhotoService::class),
-                $app->make(MailService::class)
+                $app->make(UploadService::class)
+                // $app->make(PhotoService::class),
+                // $app->make(MailService::class)
             );
         });
     }

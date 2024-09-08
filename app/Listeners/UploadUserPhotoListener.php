@@ -4,31 +4,25 @@ namespace App\Listeners;
 
 use App\Events\UserCreated;
 use App\Jobs\UploadPhotoJob;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Http\File;
 
 
-// class UploadUserPhotoListener
-// {
-//     public function handle(UserCreated $event)
-//     {
-//         $user = $event->user;
-
-//         if (request()->hasFile('photo')) {
-//             $photo = request()->file('photo');
-//             UploadPhotoJob::dispatch($user, $photo);
-//         }
-//     }
-// }
 
 class UploadUserPhotoListener
 {
     public function handle(UserCreated $event)
     {
-        $user = $event->user;
+        Log::info('Event reçu pour l\'utilisateur pour photo cloudinary  avant dispatch: ' . $event->user->id);
 
-        if (request()->hasFile('photo')) {
-            $photo = request()->file('photo');
-            UploadPhotoJob::dispatch($user->id, $photo);
-        }
+        $user = $event->user;
+        $photoPath = $event->photoPath;
+
+        UploadPhotoJob::dispatch($user,  $photoPath );
+        Log::info('Event reçu pour l\'utilisateur  et envoie de job photo sur cloudinary : ');
+        // dd(UploadPhotoJob::dispatch($user,  $photoPath ));
+
+
     }
 }
 
