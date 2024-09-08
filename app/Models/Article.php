@@ -26,6 +26,11 @@ class Article extends Model
     }
     protected $hidden = ['created_at', 'updated_at'];
 
+    // public function dettes()
+    // {
+    //     return $this->belongsToMany(Dette::class, 'article_dette')->withPivot('qteVente', 'prixVente');
+    // }
+
     public function dettes()
     {
         return $this->belongsToMany(Dette::class, 'article_dette')->withPivot('qteVente', 'prixVente');

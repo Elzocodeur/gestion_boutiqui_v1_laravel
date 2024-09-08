@@ -34,7 +34,7 @@ class StoreUserRequest extends FormRequest
             'login' => 'required|string|max:255|unique:users,login',
             'photo' => 'required|string|max:255',
             'role_id' => 'required|integer',
-            'password' => ['required', 'string', 'confirmed', new CustomPasswordRule()],
+            // 'password' => ['required', 'string', 'confirmed', new CustomPasswordRule()],
         ];
     }
 

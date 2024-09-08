@@ -5,6 +5,7 @@ use App\Http\Controllers\AuthController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ClientController;
 use App\Http\Controllers\UserController;
+use App\Http\Controllers\DetteController;
 
 
 
@@ -36,6 +37,13 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 
     // Routes pour les utilisateurs
     Route::apiResource('/users', UserController::class)->only(['index', 'store', 'show']);
+
+
+
+    // dette
+    // Route::apiResource('/dettes', DetteController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::post('/dettes', [DetteController::class, 'store']);
+
 
     // Ajoutez votre route protégée ici
     Route::get('/route-protegee', function () {

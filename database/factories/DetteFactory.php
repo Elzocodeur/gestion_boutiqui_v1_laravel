@@ -18,11 +18,10 @@ class DetteFactory extends Factory
     public function definition(): array
     {
         $montant = $this->faker->randomFloat(2, 100, 1000);
-        $montantTotal = $this->faker->randomFloat(2, 0, $montant);
+        $montantDU = $this->faker->randomFloat(2, 0, $montant);
         return [
-            'montantTotal' => $montantTotal,
-            'montantRestant' => $montantTotal - $montant,
-            'montantVerser' => $montant,
+            'montant' => $montant,
+            'montantRestant' => $montant - $montantDU,
             'client_id' => 4,
         ];
     }

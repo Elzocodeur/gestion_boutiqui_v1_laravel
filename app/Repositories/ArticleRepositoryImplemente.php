@@ -46,5 +46,5 @@ class ArticleRepositoryImplemente implements ArticleRepository
     public function newQuery()
     {
         return Article::query();
-    }
+    }   
 }

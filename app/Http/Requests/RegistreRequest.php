@@ -23,11 +23,13 @@ class RegistreRequest extends FormRequest
         return true;
     }
 
+
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
      */
+
     public function Rules(): array
     {
         return [
@@ -36,7 +38,7 @@ class RegistreRequest extends FormRequest
             'login' => 'required|string|max:255|unique:users,login',
             'photo' => 'required|string|max:255',
             //'role' => ['required'],
-            'password' =>['confirmed', new CustomPasswordRule()],
+            // 'password' =>['confirmed', new CustomPasswordRule()],
         ];
     }
 
@@ -55,4 +57,5 @@ class RegistreRequest extends FormRequest
     {
         throw new HttpResponseException($this->sendResponse($validator->errors(),StatusResponseEnum::ECHEC,404));
     }
+
 }
