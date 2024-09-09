@@ -43,12 +43,22 @@ class ArticleController extends Controller
         return response()->json($article);
     }
 
+    // public function update(UpdateArticleRequest $request, $id)
+    // {
+    //     $this->authorize('update', Article::class);
+    //     $article = $this->articleService->updateArticle($id, $request->validated());
+    //     return response()->json($article);
+    // }
+
     public function update(UpdateArticleRequest $request, $id)
-    {
-        $this->authorize('update', Article::class);
-        $article = $this->articleService->updateArticle($id, $request->validated());
-        return response()->json($article);
-    }
+{
+    // $this->authorize('update'); // Passer l'article à la politique
+    $article = Article::findOrFail($id); // Trouver l'article par son ID
+
+    $article = $this->articleService->updateArticle($id, $request->validated());
+    return response()->json($article);
+}
+
 
     public function destroy($id)
     {

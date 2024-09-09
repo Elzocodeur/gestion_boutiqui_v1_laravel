@@ -44,10 +44,6 @@ class DetteRepositoryImplement implements DetteRepository
         return Dette::findOrFail($id);
     }
 
-
-
-        // Méthode pour lister les dettes avec les filtres statut
-    // Méthode pour lister les dettes avec les filtres en utilisant les scopes
     public function getAllDettes(array $filters)
     {
         $query = Dette::query();
@@ -63,5 +59,47 @@ class DetteRepositoryImplement implements DetteRepository
 
         return $query->with('client')->get(); // Retourne les dettes avec les clients associés
     }
+
+
+    // Lister les articles d'une dette
+    public function getDetteArticles(int $detteId)
+    {
+        $dette = $this->find($detteId);
+        return $dette->articles;
+    }
+
+    // Lister les paiements  d'une dette
+    public function getPaiements(int $detteId)
+    {
+        $dette = $this->find($detteId);
+        return $dette->paiements;
+    }
+
+
+    // Ajouter un paiementn Mettre a jour les montant due et restant de la dette,Le montant entree est  numerique ,positive et inferieur ou egal au montant restant
+    public function addPaiement(int $detteId, float $montant)
+{
+    $dette = $this->find($detteId);
+
+    // Vérifie que le montant est positif et inférieur ou égal au montant restant
+    if ($montant <= 0 || $montant > $dette->montantRestant) {
+        throw new \Exception('Le montant doit être positif et inférieur ou égal au montant restant');
+    }
+
+    // Mettre à jour les montants dans la dette
+    $dette->update([
+        'montantRestant' => $dette->montantRestant - $montant,
+        // 'montant' => $dette->montant + $montant
+    ]);
+
+    // Ajouter le paiement
+    $dette->paiements()->create([
+        'montant' => $montant,
+        // Ajoute d'autres champs si nécessaire
+    ]);
+    return $dette;
+}
+
+
 
 }

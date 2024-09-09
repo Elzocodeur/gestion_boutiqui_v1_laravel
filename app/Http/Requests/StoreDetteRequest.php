@@ -11,7 +11,7 @@ class StoreDetteRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'montant' => 'required|numeric|min:0',
+            // 'montant' => 'required|numeric|min:0',
             'clientId' => 'required|exists:clients,id',
             'articles' => 'required|array|min:1',
             'articles.*.articleId' => 'required|exists:articles,id',
@@ -42,7 +42,7 @@ class StoreDetteRequest extends FormRequest
             'paiement.montant.max' => 'Le montant du paiement ne doit pas depasser le montant de la dette.',
         ];
     }
-    
+
     protected function failedValidation(Validator $validator)
     {
         throw new HttpResponseException(response()->json([

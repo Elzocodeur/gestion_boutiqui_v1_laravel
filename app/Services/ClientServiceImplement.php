@@ -12,21 +12,24 @@ use App\Models\Client;
 use Illuminate\Database\Eloquent\Collection;
 use App\Exceptions\ExceptionService;
 use App\Enums\StatusResponseEnum;
+use App\Mail\SendMailAttachment;
+use Illuminate\Support\Facades\Mail;
+
 
 
 class ClientServiceImplement implements ClientService
 {
     protected $clientRepository;
     protected $uploadService;
-    // protected $photoService;
-    // protected $mailService;
+    protected $photoService;
+    protected $mailService;
 
-    public function __construct(ClientRepository $clientRepository, UploadService $uploadService) //, PhotoService $photoService, MailService $mailService
+    public function __construct(ClientRepository $clientRepository, UploadService $uploadService,PhotoService $photoService, MailService $mailService) //, PhotoService $photoService, MailService $mailService
     {
         $this->clientRepository = $clientRepository;
         $this->uploadService = $uploadService;
-        // $this->photoService = $photoService;
-        // $this->mailService = $mailService;
+        $this->photoService = $photoService;
+        $this->mailService = $mailService;
     }
 
     public function createClient(array $data)
@@ -50,6 +53,7 @@ class ClientServiceImplement implements ClientService
     }
 
                     // debut-------------
+
                     // public function addUserToClient(array $userData, $clientId)
 
                     // {
@@ -79,12 +83,12 @@ class ClientServiceImplement implements ClientService
                     //         $client->save();
 
                     //         // Gérer l'upload de la photo
-                    //         // if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
-                    //         //     $this->photoService->uploadPhoto($user, $userData['photo']);
-                    //         // }
+                    //         if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
+                    //             $this->photoService->uploadPhoto($user, $userData['photo']);
+                    //         }
 
-                    //         // // Génération du QR code et de la carte de fidélité
-                    //         // $this->mailService->sendLoyaltyCard($user, $client);
+                    //         // Génération du QR code et de la carte de fidélité
+                    //         $this->mailService->sendLoyaltyCard($user, $client);
 
 
                     //         return $client;
@@ -94,82 +98,96 @@ class ClientServiceImplement implements ClientService
                     // }
 
 
-                //     public function addUserToClient(array $userData, $clientId)
-                // {
-                //     try {
-                //         $client = $this->getClientById($clientId);
-                //         if (!$client) {
-                //             throw new Exception('Client non trouvé');
-                //         }
 
-                //         if ($client->user_id) {
-                //             throw new Exception('Le client a déjà un compte utilisateur');
-                //         }
+                    public function addUserToClient(array $userData, $clientId)
+                    {
+                        try {
+                            $client = $this->getClientById($clientId);
+                            if (!$client) {
+                                throw new Exception('Client non trouvé');
+                            }
 
-                //         // Création du compte utilisateur
-                //         $photoPath = is_string($userData['photo']) ? $userData['photo'] : $userData['photo']->getRealPath(); // Conversion de la photo en chemin
+                            if ($client->user_id) {
+                                throw new Exception('Le client a déjà un compte utilisateur');
+                            }
 
-                //         $user = User::create([
-                //             'nom' => $userData['nom'],
-                //             'prenom' => $userData['prenom'],
-                //             'login' => $userData['login'],
-                //             'password' => Hash::make($userData['password']),
-                //             'photo' => $photoPath, // Assurez-vous que la photo est bien une chaîne de caractères
-                //             'role_id' => $userData['role_id'],
-                //         ]);
+                            // Gérer l'upload de la photo avant de créer l'utilisateur
+                            $photoPath = null;
+                            if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
+                                // Uploader la photo ici et obtenir le chemin
+                                $photoPath = $userData['photo']->store('photos', 'public');
+                            }
 
-                //         // Association de l'utilisateur au client
-                //         $client->user_id = $user->id;
-                //         $client->save();
+                            // Création du compte utilisateur
+                            $user = User::create([
+                                'nom' => $userData['nom'],
+                                'prenom' => $userData['prenom'],
+                                'login' => $userData['login'],
+                                'password' => Hash::make($userData['password']),
+                                'photo' => $photoPath, // Insérer le chemin de la photo
+                                'role_id' => $userData['role_id'],
+                            ]);
 
-                //         return $client;
-                //     } catch (Exception $e) {
-                //         throw new ExceptionService('Erreur lors de l\'ajout de l\'utilisateur au client: ' . $e->getMessage());
-                //     }
-                // }
+                            // Association de l'utilisateur au client
+                            $client->user_id = $user->id;
+                            $client->save();
 
-            public function addUserToClient(array $userData, $clientId)
-            {
-                try {
-                    $client = $this->getClientById($clientId);
-                    if (!$client) {
-                        throw new Exception('Client non trouvé');
+                            $this->photoService->uploadPhoto($user, $userData['photo']);
+
+                            // Génération du QR code et de la carte de fidélité
+                            $this->mailService->sendLoyaltyCard($user, $client);
+
+                            return $client;
+                        } catch (Exception $e) {
+                            throw new ExceptionService('Erreur lors de l\'ajout de l\'utilisateur au client: ' . $e->getMessage());
+                        }
                     }
 
-                    if ($client->user_id) {
-                        throw new Exception('Le client a déjà un compte utilisateur');
-                    }
 
-                    // Sauvegarder la photo localement si elle est un fichier
-                    if ($userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
-                        $photoPath = $userData['photo']->store('temp_photos');
-                    } else {
-                        $photoPath = $userData['photo']; // Si c'est déjà une chaîne de caractères
-                    }
 
-                    // Création du compte utilisateur
-                    $user = User::create([
-                        'nom' => $userData['nom'],
-                        'prenom' => $userData['prenom'],
-                        'login' => $userData['login'],
-                        'password' => Hash::make($userData['password']),
-                        'photo' => $photoPath, // Stockage du chemin
-                        // dd($photoPath),
-                        'role_id' => $userData['role_id'],
-                    ]);
 
-                    // Association de l'utilisateur au client
-                    $client->user_id = $user->id;
-                    $client->save();
+            // public function addUserToClient(array $userData, $clientId)
+            // {
+            //     try {
+            //         $client = $this->getClientById($clientId);
+            //         if (!$client) {
+            //             throw new Exception('Client non trouvé');
+            //         }
 
-                    // Retourner la photo pour le job
-                    return ['client' => $client, 'photo' => $userData['photo']];
-                } catch (Exception $e) {
-                    throw new ExceptionService('Erreur lors de l\'ajout de l\'utilisateur au client: ' . $e->getMessage());
-                }
-            }
+            //         if ($client->user_id) {
+            //             throw new Exception('Le client a déjà un compte utilisateur');
+            //         }
 
-            
+            //         // Sauvegarder la photo localement si elle est un fichier
+            //         if ($userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
+            //             $photoPath = $userData['photo']->store('temp_photos');
+            //         } else {
+            //             $photoPath = $userData['photo']; // Si c'est déjà une chaîne de caractères
+            //         }
+
+            //         // Création du compte utilisateur
+            //         $user = User::create([
+            //             'nom' => $userData['nom'],
+            //             'prenom' => $userData['prenom'],
+            //             'login' => $userData['login'],
+            //             'password' => Hash::make($userData['password']),
+            //             'photo' => $photoPath, // Stockage du chemin
+            //             // dd($photoPath),
+            //             'role_id' => $userData['role_id'],
+            //         ]);
+
+            //         // Association de l'utilisateur au client
+            //         $client->user_id = $user->id;
+            //         $client->save();
+
+            //         // Retourner la photo pour le job
+            //         return ['client' => $client, 'photo' => $userData['photo']];
+            //     } catch (Exception $e) {
+            //         throw new ExceptionService('Erreur lors de l\'ajout de l\'utilisateur au client: ' . $e->getMessage());
+            //     }
+            // }
+
+
 
     public function getClientWithUser($id)
     {

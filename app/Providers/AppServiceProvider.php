@@ -21,6 +21,8 @@ use App\Observers\DetteObserver;
 use App\Models\Dette;
 use App\Repositories\DetteRepository;
 use App\Repositories\DetteRepositoryImplement;
+use App\Facades\UploadServiceImgurFacade as UploadWithImgur;
+use App\Services\UploadServiceImgur;
 
 
 class AppServiceProvider extends ServiceProvider
@@ -58,10 +60,15 @@ class AppServiceProvider extends ServiceProvider
         $this->app->singleton('client-service', function ($app) {
             return new ClientServiceImplement(
                 $app->make(ClientRepository::class),
-                $app->make(UploadService::class)
-                // $app->make(PhotoService::class),
-                // $app->make(MailService::class)
+                $app->make(UploadService::class),
+                $app->make(PhotoService::class),
+                $app->make(MailService::class)
             );
+        });
+
+
+        $this->app->singleton('uploadserviceimgur', function ($app) {
+            return new UploadServiceImgur();
         });
     }
 

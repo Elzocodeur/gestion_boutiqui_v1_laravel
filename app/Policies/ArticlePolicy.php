@@ -22,10 +22,15 @@ class ArticlePolicy
         return $user->role->nomRole === 'BOUTIQUIER';
     }
 
+    // public function update(User $user, Article $article)
+    // {
+    //     return $user->role->nomRole === 'BOUTIQUIER';
+    // }
+
     public function update(User $user, Article $article)
-    {
-        return $user->role->nomRole === 'BOUTIQUIER';
-    }
+{
+    return $user->role->nomRole === 'BOUTIQUIER' ;
+}
 
     public function delete(User $user, Article $article)
     {

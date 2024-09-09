@@ -29,7 +29,7 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
     // Routes pour les clients
     Route::apiResource('/clients', ClientController::class)->only(['index', 'store', 'show']);
     Route::patch('/clients/{id}/add-user', [ClientController::class, 'addUserToClient']);
-    Route::post('/clients/telephone/{telephone}', [ClientController::class, 'showClientByTelephone']);
+    Route::post('/clients/telephone', [ClientController::class, 'showClientByTelephone']);
     Route::post('/clients/{id}/dettes', [ClientController::class, 'listDettesClient']);
     Route::post('/clients/{id}/user', [ClientController::class, 'showClientWithUser']);
     Route::middleware(['auth:api'])->get('/api/v1/clients', [ClientController::class, 'index']);
@@ -42,7 +42,14 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 
     // dette
     Route::apiResource('/dettes', DetteController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    Route::get('/dettes/{id}/articles', [DetteController::class, 'showArticlesDettes']);
+    Route::get('/dettes/{id}/paiements', [DetteController::class, 'showPaiements']);
+    Route::post('/dettes/{id}/paiements', [DetteController::class, 'storePaiement']);
     // Route::post('/dettes', [DetteController::class, 'store']);
+
+
+    // paiements
+
 
 
     // Ajoutez votre route protégée ici

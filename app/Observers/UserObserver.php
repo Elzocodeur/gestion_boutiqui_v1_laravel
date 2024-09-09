@@ -19,6 +19,14 @@
             Log::info('User créé et Event déclenché.');
             // dd($photoPath);
             event(new UserCreated($user, $photoPath));
+
         }
+
+
+        // release
+        // public function created(User $user): void
+        // {
+        //     event(new UserCreated($user));
+        // }
     }
 

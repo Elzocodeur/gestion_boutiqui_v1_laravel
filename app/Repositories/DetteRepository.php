@@ -45,5 +45,10 @@ interface DetteRepository
      */
     public function findById(int $id);
 
-    public function getAllDettes(array $filters); 
+    public function getAllDettes(array $filters);
+
+    public function getDetteArticles(int $detteId);
+    public function getPaiements(int $detteId);
+
+    public function addPaiement(int $detteId, float $montant);
 }

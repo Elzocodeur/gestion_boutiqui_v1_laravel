@@ -24,7 +24,7 @@ class UserController extends Controller
 
     public function index(Request $request)
     {
-        $this->authorize('viewAny', User::class);
+        // $this->authorize('viewAny', User::class);
         // Initialisation de la requête utilisateur
         $query = User::query();
 
@@ -72,7 +72,7 @@ class UserController extends Controller
      */
     public function store(StoreUserRequest $request)
     {
-        $this->authorize('create', User::class);
+        // $this->authorize('create', User::class);
 
         $validatedData = $request->validated();
 
@@ -87,7 +87,6 @@ class UserController extends Controller
 
         return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur créé avec succès', 201);
     }
-
 
         /**
      * @OA\Get(

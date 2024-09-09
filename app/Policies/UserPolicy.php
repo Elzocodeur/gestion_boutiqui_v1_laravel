@@ -9,7 +9,8 @@ class UserPolicy
 {
     public function viewAny(User $user)
     {
-        return $user->role->name === 'ADMIN';
+        return $user->role->nomRole === 'ADMIN';
+
     }
 
     /**
@@ -17,7 +18,7 @@ class UserPolicy
      */
     public function view(User $user)
     {
-        return $user->role->name === 'ADMIN';
+        return $user->role->nomRole === 'ADMIN';
     }
 
     /**
@@ -25,7 +26,7 @@ class UserPolicy
      */
     public function create(User $user)
     {
-        return $user->role->name === 'ADMIN';
+        return $user->role->nomRole === 'ADMIN';
     }
 
     /**
