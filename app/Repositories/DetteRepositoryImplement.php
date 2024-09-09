@@ -43,4 +43,25 @@ class DetteRepositoryImplement implements DetteRepository
     {
         return Dette::findOrFail($id);
     }
+
+
+
+        // Méthode pour lister les dettes avec les filtres statut
+    // Méthode pour lister les dettes avec les filtres en utilisant les scopes
+    public function getAllDettes(array $filters)
+    {
+        $query = Dette::query();
+
+        // Utiliser les scopes pour filtrer selon le statut
+        if (isset($filters['statut'])) {
+            if ($filters['statut'] === 'Solde') {
+                $query->solde(); // Scope pour les dettes soldées
+            } elseif ($filters['statut'] === 'NonSolde') {
+                $query->nonSolde(); // Scope pour les dettes non soldées
+            }
+        }
+
+        return $query->with('client')->get(); // Retourne les dettes avec les clients associés
+    }
+
 }

@@ -41,8 +41,8 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 
 
     // dette
-    // Route::apiResource('/dettes', DetteController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
-    Route::post('/dettes', [DetteController::class, 'store']);
+    Route::apiResource('/dettes', DetteController::class)->only(['index', 'store', 'show', 'update', 'destroy']);
+    // Route::post('/dettes', [DetteController::class, 'store']);
 
 
     // Ajoutez votre route protégée ici

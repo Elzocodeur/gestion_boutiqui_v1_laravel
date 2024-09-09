@@ -47,6 +47,18 @@ class Dette extends Model
         self::observe(DetteObserver::class);
     }
 
+          // Scope pour les dettes soldées (montantRestant = 0)
+    public function scopeSolde($query)
+    {
+        return $query->where('montantRestant', 0);
+    }
+
+    // Scope pour les dettes non soldées (montantRestant > 0)
+    public function scopeNonSolde($query)
+    {
+        return $query->where('montantRestant', '>', 0);
+    }
+
     public function client()
     {
         return $this->belongsTo(Client::class);

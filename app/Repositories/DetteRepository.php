@@ -44,4 +44,6 @@ interface DetteRepository
      * @return mixed
      */
     public function findById(int $id);
+
+    public function getAllDettes(array $filters); 
 }
