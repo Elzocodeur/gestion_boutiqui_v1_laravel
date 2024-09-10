@@ -67,6 +67,7 @@ class RelanceUploadPhotoCloudinary extends Command
             try {
                 // Chemin relatif vers la photo dans le stockage local
                 $localPhotoPath = storage_path('app/public/' . $user->photo);
+                // $this->info("Traitement de l'utilisateur {$user->nom} : {$localPhotoPath}");
 
                 if (!file_exists($localPhotoPath)) {
                     $this->error("La photo locale de l'utilisateur {$user->nom} est introuvable.");

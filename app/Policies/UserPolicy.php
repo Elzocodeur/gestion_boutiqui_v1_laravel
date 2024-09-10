@@ -16,11 +16,16 @@ class UserPolicy
     /**
      * Vérifie si l'utilisateur peut afficher un article spécifique.
      */
-    public function view(User $user)
-    {
-        return $user->role->nomRole === 'ADMIN';
-    }
+        // public function view(User $user)
+        // {
+        //     return $user->role->nomRole === 'ADMIN';
+        // }
 
+
+        // public function view(User $user, User $model)
+        // {
+        //     return $user->role->nomRole === 'ADMIN' || $user->id === $model->id;
+        // }
     /**
      * Vérifie si l'utilisateur peut créer un article.
      */

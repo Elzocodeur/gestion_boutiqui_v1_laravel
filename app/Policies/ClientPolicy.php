@@ -18,7 +18,7 @@ class ClientPolicy
      */
     public function view(User $user, Client $client)
     {
-        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT';
+        return $user->role->nomRole === 'BOUTIQUIER' || $user->role->nomRole === 'CLIENT' ;
     }
 
     /**

@@ -36,8 +36,8 @@ Route::middleware(['auth:api'])->prefix('v1')->group(function () {
 
 
     // Routes pour les utilisateurs
-    Route::apiResource('/users', UserController::class)->only(['index', 'store', 'show']);
-
+    Route::apiResource('/users', UserController::class)->only(['index', 'store']);
+    Route::get('/users/{id}', [UserController::class, 'show']);
 
 
     // dette

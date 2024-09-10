@@ -87,6 +87,46 @@ components:
           type: string
           format: date-time
 
+    Dette:
+      type: object
+      properties:
+        id:
+          type: integer
+        montant:
+          type: number
+          format: float
+        montantRestant:
+          type: number
+          format: float
+        statut:
+          type: string
+          enum: [EN_COURS, SOLDEE]
+        client_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
+    Paiement:
+      type: object
+      properties:
+        id:
+          type: integer
+        montant:
+          type: number
+          format: float
+        dette_id:
+          type: integer
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+
 security:
   - bearerAuth: []
 
@@ -113,7 +153,7 @@ paths:
         '401':
           description: Identifiants incorrects
 
-  /api/v1/auth/logout:
+  /v1/auth/logout:
     post:
       tags:
         - Authentification
@@ -124,7 +164,7 @@ paths:
         '401':
           description: Non authentifié
 
-  /api/v1/articles:
+  /v1/articles:
     get:
       tags:
         - Articles
@@ -166,7 +206,7 @@ paths:
         '403':
           description: Accès interdit
 
-  /api/v1/articles/{id}:
+  /v1/articles/{id}:
     get:
       tags:
         - Articles
@@ -229,7 +269,7 @@ paths:
         '404':
           description: Article non trouvé
 
-  /api/v1/articles/libelle/{libelle}:
+  /v1/articles/libelle/{libelle}:
     post:
       tags:
         - Articles
@@ -250,7 +290,7 @@ paths:
         '404':
           description: Article non trouvé
 
-  /api/v1/articles/stock:
+  /v1/articles/stock:
     post:
       tags:
         - Articles
@@ -277,7 +317,7 @@ paths:
         '500':
           description: Erreur interne du serveur
 
-  /api/v1/clients:
+  /v1/clients:
     get:
       tags:
         - Clients
@@ -312,7 +352,7 @@ paths:
         '500':
           description: Erreur lors de la création du client
 
-  /api/v1/clients/{id}:
+  /v1/clients/{id}:
     get:
       tags:
         - Clients
@@ -333,7 +373,7 @@ paths:
         '404':
           description: Client non trouvé
 
-  /api/v1/users:
+  /v1/users:
     get:
       tags:
         - Utilisateurs
@@ -383,7 +423,7 @@ paths:
         '403':
           description: Accès interdit
 
-  /api/v1/users/{id}:
+  /v1/users/{id}:
     get:
       tags:
         - Utilisateurs
@@ -403,3 +443,200 @@ paths:
                 $ref: '#/components/schemas/User'
         '404':
           description: Utilisateur non trouvé
+
+  /v1/dettes:
+    get:
+      tags:
+        - Dettes
+      summary: Liste toutes les dettes
+      parameters:
+        - name: statut
+          in: query
+          description: Filtrer par statut
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Liste des dettes récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Dette'
+                  message:
+                    type: string
+                  status:
+                    type: string
+
+    post:
+      tags:
+        - Dettes
+      summary: Créer une nouvelle dette
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Dette'
+      responses:
+        '201':
+          description: Dette créée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Dette'
+                  message:
+                    type: string
+                  status:
+                    type: string
+
+  /v1/dettes/{id}:
+    get:
+      tags:
+        - Dettes
+      summary: Afficher une dette spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dette récupérée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Dette'
+                  message:
+                    type: string
+                  status:
+                    type: string
+
+    delete:
+      tags:
+        - Dettes
+      summary: Supprimer une dette spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Dette supprimée avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: null
+                  message:
+                    type: string
+                  status:
+                    type: string
+
+  /v1/dettes/{id}/articles:
+    get:
+      tags:
+        - Dettes
+      summary: Liste les articles d'une dette spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Articles de la dette récupérés avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Article'
+                  message:
+                    type: string
+                  status:
+                    type: string
+
+  /v1/dettes/{id}/paiements:
+    get:
+      tags:
+        - Dettes
+      summary: Liste les paiements d'une dette spécifique
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Paiements de la dette récupérés avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/Paiement'
+                  message:
+                    type: string
+                  status:
+                    type: string
+
+    post:
+      tags:
+        - Dettes
+      summary: Ajouter un paiement à une dette
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: integer
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                montant:
+                  type: number
+                  format: float
+                  minimum: 0.01
+      responses:
+        '200':
+          description: Paiement ajouté avec succès
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Dette'
+                  message:
+                    type: string
+                  status:
+                    type: string

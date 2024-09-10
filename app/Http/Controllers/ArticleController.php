@@ -71,7 +71,7 @@ class ArticleController extends Controller
     public function show($id)
     {
 
-        $this->authorize('view', Article::class);
+        // $this->authorize('view', Article::class);
         $article = $this->articleService->getArticleById($id);
         return response()->json($article);
     }

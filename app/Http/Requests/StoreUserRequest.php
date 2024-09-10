@@ -32,8 +32,9 @@ class StoreUserRequest extends FormRequest
             'nom' => 'required|string|max:255',
             'prenom' => 'required|string|max:255',
             'login' => 'required|string|max:255|unique:users,login',
+            // 'photo' => 'required|string|max:255',
             'password' => 'required|string|min:4',
-            'photo' => 'nullable|image|max:2048', // photo optionnelle
+            'photo' => 'nullable|image|max:2048',
             'role_id' => 'required|integer',
             // 'password' => ['required', 'string', 'confirmed', new CustomPasswordRule()],
         ];
@@ -48,9 +49,9 @@ class StoreUserRequest extends FormRequest
             'nom.required' => 'Le nom est obligatoire.',
             'prenom.required' => 'Le prénom est obligatoire.',
             'role_id.required' => 'Le rôle est obligatoire.',
-            // 'login.required' => 'Le login est obligatoire.',
-            // 'login.unique' => "Ce login est déjà utilisé.",
-            // 'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
+            'login.required' => 'Le login est obligatoire.',
+            'login.unique' => "Ce login est déjà utilisé.",
+            'password.confirmed' => 'La confirmation du mot de passe ne correspond pas.',
         ];
     }
     /**

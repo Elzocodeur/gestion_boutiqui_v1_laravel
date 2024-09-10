@@ -1,26 +1,28 @@
 <?php
-    namespace App\Observers;
+    // namespace App\Observers;
 
-    use App\Models\User;
-    use App\Events\UserCreated;
-    use Illuminate\Support\Facades\Log;
-    use Illuminate\Http\File;
+    // use App\Models\User;
+    // use App\Events\UserCreated;
+    // use Illuminate\Support\Facades\Log;
+    // use Illuminate\Http\File;
 
-    class UserObserver
-    {
-        public function created(User $user)
-        {
-            Log::info('User créé : ');
+    // class UserObserver
+    // {
+    //     public function created(User $user)
+    //     {
+    //         Log::info('User créé : ');
 
-            // Passer la photo correctement au job
-            $photoPath = $user->photo;
-            // $photo = file_exists($photoPath) ? new File($photoPath) : null;
+    //         // Passer la photo correctement au job
+    //         $photoPath = $user->photo;
+    //         // dd($photoPath);
+    //         event(new UserCreated($user, $photoPath));
+    //         Log::info('User créé et Event déclenché.');
 
-            Log::info('User créé et Event déclenché.');
-            // dd($photoPath);
-            event(new UserCreated($user, $photoPath));
+    //     }
 
-        }
+    // }
+
+
 
 
         // release
@@ -28,5 +30,22 @@
         // {
         //     event(new UserCreated($user));
         // }
-    }
 
+
+
+        namespace App\Observers;
+
+use App\Models\User;
+use App\Events\UserCreated;
+use Illuminate\Support\Facades\Log;
+
+class UserObserver
+{
+    public function created(User $user)
+    {
+        Log::info('Utilisateur créé, déclenchement de l\'événement UserCreated.');
+
+        $photoPath = $user->photo;
+        event(new UserCreated($user, $photoPath)); // Déclenchement de l'événement avec la photo
+    }
+}

@@ -70,23 +70,54 @@ class UserController extends Controller
      *     security={{"Bearer":{}}}
      * )
      */
+
+
+    // public function store(StoreUserRequest $request)
+    // {
+    //     // $this->authorize('create', User::class);
+
+    //     $validatedData = $request->validated();
+
+    //     $user = User::create([
+    //         'nom' => $validatedData['nom'],
+    //         'prenom' => $validatedData['prenom'],
+    //         'login' => $validatedData['login'],
+    //         'photo' => $validatedData['photo'],
+    //         'password' => bcrypt($validatedData['password']),
+    //         'role_id' => $validatedData['role_id'],
+    //     ]);
+
+    //     return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur créé avec succès', 201);
+    // }
+
+
     public function store(StoreUserRequest $request)
-    {
-        // $this->authorize('create', User::class);
+{
+    // $this->authorize('create', User::class);
 
-        $validatedData = $request->validated();
+    $validatedData = $request->validated();
 
-        $user = User::create([
-            'nom' => $validatedData['nom'],
-            'prenom' => $validatedData['prenom'],
-            'login' => $validatedData['login'],
-            'photo' => $validatedData['photo'],
-            'password' => bcrypt($validatedData['password']),
-            'role_id' => $validatedData['role_id'],
-        ]);
-
-        return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur créé avec succès', 201);
+    // Vérifier si une photo a été uploadée
+    if ($request->hasFile('photo')) {
+        // Enregistrer la photo dans le dossier 'user_images' du système de fichiers public
+        $photoPath = $request->file('photo')->store('user_images', 'public');
+    } else {
+        $photoPath = null; // Si aucune photo n'est envoyée
     }
+
+    // Créer l'utilisateur avec les données validées
+    $user = User::create([
+        'nom' => $validatedData['nom'],
+        'prenom' => $validatedData['prenom'],
+        'login' => $validatedData['login'],
+        'photo' => $photoPath, // Enregistrer le chemin de la photo au lieu du fichier
+        'password' => bcrypt($validatedData['password']),
+        'role_id' => $validatedData['role_id'],
+    ]);
+
+    return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur créé avec succès', 201);
+}
+
 
         /**
      * @OA\Get(
@@ -117,15 +148,32 @@ class UserController extends Controller
      *     security={{"Bearer":{}}}
      * )
      */
-    public function show($id)
-    {
-        $user = User::with('role')->find($id);
-        $this->authorize('view', $user);
+    // public function show($id)
+    // {
+    //     $user = User::with('role')->find($id);
+    //     $this->authorize('view');
 
-        if (!$user) {
-            return $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Utilisateur non trouvé', 404);
-        }
+    //     if (!$user) {
+    //         return $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Utilisateur non trouvé', 404);
+    //     }
 
-        return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur récupéré avec succès');
-    }
+    //     return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur récupéré avec succès');
+    // }
+
+
+                public function show($id)
+            {
+                $user = User::with('role')->find($id);
+
+                if (!$user) {
+                    return $this->sendResponse(null, StatusResponseEnum::ECHEC, 'Utilisateur non trouvé', 404);
+                }
+
+                // Autorisation avec l'utilisateur cible
+                $this->authorize('view', $user);
+
+                return $this->sendResponse(new UserResource($user), StatusResponseEnum::SUCCESS, 'Utilisateur récupéré avec succès');
+
+            }
+
 }

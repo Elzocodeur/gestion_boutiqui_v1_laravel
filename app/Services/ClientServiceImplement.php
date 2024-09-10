@@ -24,7 +24,7 @@ class ClientServiceImplement implements ClientService
     protected $photoService;
     protected $mailService;
 
-    public function __construct(ClientRepository $clientRepository, UploadService $uploadService,PhotoService $photoService, MailService $mailService) //, PhotoService $photoService, MailService $mailService
+    public function __construct(ClientRepository $clientRepository, UploadService $uploadService, PhotoService $photoService, MailService $mailService) //, PhotoService $photoService, MailService $mailService
     {
         $this->clientRepository = $clientRepository;
         $this->uploadService = $uploadService;
@@ -99,6 +99,8 @@ class ClientServiceImplement implements ClientService
 
 
 
+
+                    // par injection
                     public function addUserToClient(array $userData, $clientId)
                     {
                         try {
@@ -115,7 +117,7 @@ class ClientServiceImplement implements ClientService
                             $photoPath = null;
                             if (isset($userData['photo']) && $userData['photo'] instanceof \Illuminate\Http\UploadedFile) {
                                 // Uploader la photo ici et obtenir le chemin
-                                $photoPath = $userData['photo']->store('photos', 'public');
+                                $photoPath = $userData['photo']->store('user_images', 'public');
                             }
 
                             // Création du compte utilisateur

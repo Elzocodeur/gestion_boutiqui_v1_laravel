@@ -60,7 +60,7 @@ class ClientController extends Controller
 
 
 
-    
+
     public function store(StoreClientRequest $request)
     {
         $this->authorize('create', Client::class);
